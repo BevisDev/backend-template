@@ -1,0 +1,9 @@
+server:
+  profile: dev
+  port: 8080
+  version: 1.0.0
+
+database:
+  user: "admin"
+  password: "secret"
+  name: "mydatabase"
