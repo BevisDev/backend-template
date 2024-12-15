@@ -26,7 +26,6 @@ func LoadConfig() {
 		log.Fatalf("Error decode config into struct, %v", err)
 	}
 
-	log.Printf("Server Profile: %s\n", appConfig.ServerConfig.Profile)
-	log.Printf("Server Port: %d\n", appConfig.ServerConfig.Port)
-	log.Printf("Server Version: %s\n", appConfig.ServerConfig.Version)
+	log.Printf("Load configuration profile %v successful", appConfig.ServerConfig.Profile)
+	log.Printf("Welcome %v version %v ", appConfig.ServerConfig.Name, appConfig.ServerConfig.Version)
 }

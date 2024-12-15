@@ -1,9 +1,25 @@
 server:
+  name: "GoBackend"
   profile: dev
+  trustedProxies:
+    - 127.0.0.1
   port: 8080
   version: 1.0.0
 
-database:
-  user: "admin"
-  password: "secret"
-  name: "mydatabase"
+databases:
+  mssql:
+    username: admin
+    password: secret
+    schema: mydatabase
+  postgresql:
+    username: admin111
+    password: secret222
+    schema: mydatabase333
+
+logger:
+  logLevel: debug
+  fileName: ./log
+  maxSize: 10
+  maxBackup: 3
+  maxAge: 28
+  compress: true
