@@ -1,7 +1,9 @@
 package main
 
-import "github.com/BevisDev/backend-template/src/main/initialize"
+import (
+	"github.com/BevisDev/backend-template/src/main/startup"
+)
 
 func main() {
-	initialize.Run()
+	startup.Run()
 }

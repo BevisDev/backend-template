@@ -1,4 +1,4 @@
-package initialize
+package startup
 
 import (
 	"github.com/BevisDev/backend-template/src/main/config"

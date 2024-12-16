@@ -11,13 +11,28 @@
 - [Gin Gonic](https://github.com/gin-gonic/gin)
 - [Viper](https://github.com/spf13/viper)
 - [Zap](https://github.com/uber-go/zap)
-- [lumberjack](https://github.com/natefinch/lumberjack)
+- [Lumberjack](https://github.com/natefinch/lumberjack)
 - [Gorm](https://gorm.io/docs/index.html)
+
+### Init Go Module
+
+Create folder project
+
+```sh
+$ mkdir go-backend
+$ cd go-backend
+```
+
+Init Go module
+
+```sh
+$ go mod init github.com/BevisDev/go-backend
+```
 
 ### Getting Framework
 
 ```sh
-go get -u github.com/gin-gonic/gin
+$ go get -u github.com/gin-gonic/gin
 ```
 
 ### Running Gin
@@ -53,18 +68,17 @@ Then visit [`0.0.0.0:8080/ping`](http://0.0.0.0:8080/ping) in your browser to se
 ## Getting Viper
 
 ```sh
-go get github.com/spf13/viper
+$ go get github.com/spf13/viper
 ```
 
 ## Getting handler Logger
 
 ```sh
-go get -u go.uber.org/zap
+$ go get -u go.uber.org/zap
 ```
 
 For writting logs to rolling files
 
 ```sh
-go get github.com/natefinch/lumberjack
+$ go get github.com/natefinch/lumberjack
 ```
-
