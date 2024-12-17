@@ -7,14 +7,20 @@ server:
   version: 1.0.0
 
 databases:
-  mssql:
+  mysql:
+    host: localhost
+    port: 3306
     username: admin
     password: secret
-    schema: mydatabase
+    schema:
+      - mydatabase
   postgresql:
+    host: localhost
+    port: 5432
     username: admin111
     password: secret222
-    schema: mydatabase333
+    schema:
+      - mydatabase333
 
 logger:
   logLevel: debug

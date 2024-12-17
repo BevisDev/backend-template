@@ -3,7 +3,7 @@ package startup
 import (
 	"log"
 
-	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/BevisDev/backend-template/src/main/global"
 	"github.com/spf13/viper"
 )
 
@@ -14,18 +14,14 @@ func LoadConfig() {
 	viper.SetConfigType("yaml")
 
 	// read config
-	err := viper.ReadInConfig()
-	if err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error can not read configuration %v", err)
 	}
 
-	var appConfig config.AppConfig
-
-	err = viper.Unmarshal(&appConfig)
-	if err != nil {
+	if err := viper.Unmarshal(&global.AppConfig); err != nil {
 		log.Fatalf("Error decode config into struct, %v", err)
 	}
 
-	log.Printf("Load configuration profile %v successful", appConfig.ServerConfig.Profile)
-	log.Printf("Welcome %v version %v ", appConfig.ServerConfig.Name, appConfig.ServerConfig.Version)
+	log.Printf("Load configuration profile %v successful", global.AppConfig.ServerConfig.Profile)
+	log.Printf("Welcome %v version %v ", global.AppConfig.ServerConfig.Name, global.AppConfig.ServerConfig.Version)
 }
