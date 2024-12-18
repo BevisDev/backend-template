@@ -5,7 +5,7 @@ type AppConfig struct {
 	ServerConfig struct {
 		Name           string   `mapstructure:"name"`
 		Profile        string   `mapstructure:"profile"`
-		Port           int      `mapstructure:"port"`
+		Port           string   `mapstructure:"port"`
 		Version        string   `mapstructure:"version"`
 		TrustedProxies []string `mapstructure:"trustedProxies"`
 	} `mapstructure:"server"`

@@ -8,20 +8,23 @@ import (
 )
 
 func LoadConfig() {
-	viper := viper.New()
-	viper.AddConfigPath("../../")
-	viper.SetConfigName("dev")
-	viper.SetConfigType("yaml")
+	v := viper.New()
+	v.AddConfigPath("../../")
+	v.SetConfigName("dev")
+	v.SetConfigType("yaml")
 
 	// read config
-	if err := viper.ReadInConfig(); err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		log.Fatalf("Error can not read configuration %v", err)
 	}
 
-	if err := viper.Unmarshal(&global.AppConfig); err != nil {
+	if err := v.Unmarshal(&global.AppConfig); err != nil {
 		log.Fatalf("Error decode config into struct, %v", err)
 	}
 
-	log.Printf("Load configuration profile %v successful", global.AppConfig.ServerConfig.Profile)
-	log.Printf("Welcome %v version %v ", global.AppConfig.ServerConfig.Name, global.AppConfig.ServerConfig.Version)
+	serverConfig := global.AppConfig.ServerConfig
+	log.Println("================================")
+	log.Printf("Load configuration profile %v successful", serverConfig.Profile)
+	log.Printf("Welcome to %v version %v ", serverConfig.Name, serverConfig.Version)
+	log.Println("================================")
 }

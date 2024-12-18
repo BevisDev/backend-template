@@ -4,7 +4,7 @@
 
 ### Prerequisites
 
-- [Go 1.23.3](https://go.dev/dl/) or higher
+- [Go 1.23.4](https://go.dev/doc/install) or higher
 
 ### Dependencies
 

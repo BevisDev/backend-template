@@ -4,23 +4,27 @@ import (
 	"net/http"
 
 	"github.com/BevisDev/backend-template/src/main/global"
+	"github.com/BevisDev/backend-template/src/main/router"
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {
 	var r *gin.Engine
-	if global.AppConfig.ServerConfig.Profile == "dev" {
+	serverConfig := global.AppConfig.ServerConfig
+
+	if serverConfig.Profile == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+		r = gin.New()
+	} else {
 		gin.SetMode(gin.DebugMode)
 		gin.ForceConsoleColor()
 		r = gin.Default()
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-		r = gin.New()
 	}
 
 	// use Middlewares
 
 	// use Routers
+	// ping to health check system
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
@@ -29,14 +33,11 @@ func InitRouter() *gin.Engine {
 
 	api := r.Group("/api")
 	{
+		// version 1
 		v1 := api.Group("/v1")
 		{
-			router.InitUserGroup.InitUserGroup(v1)
-		}
-
-		v2 := api.Group("/v2")
-		{
-			v2.GET("/users", getNewUsersHandler) // /api/v2/users
+			// router auth
+			router.InitAuthRouterGroup(v1)
 		}
 	}
 

@@ -3,22 +3,22 @@ package logger
 import (
 	"os"
 
-	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/BevisDev/backend-template/src/main/global"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type LoggerZap struct {
+type Zap struct {
 	*zap.Logger
 }
 
-func NewLogger(config config.AppConfig) *LoggerZap {
-	logLevel := config.LoggerConfig.LogLevel //"debug"
-	// debug-> info-> warn ->error->fatal->panic
+func NewLogger() *Zap {
+	loggerConfig := global.AppConfig.LoggerConfig
 
+	// debug-> info-> warn ->error->fatal->panic
 	var level zapcore.Level
-	switch logLevel {
+	switch loggerConfig.LogLevel {
 	case "debug":
 		level = zapcore.DebugLevel
 	case "info":
@@ -33,18 +33,18 @@ func NewLogger(config config.AppConfig) *LoggerZap {
 
 	encoder := getEncoderLog()
 	hook := lumberjack.Logger{
-		Filename:   config.LoggerConfig.Filename,
-		MaxSize:    config.LoggerConfig.MaxSize,
-		MaxBackups: config.LoggerConfig.MaxBackups,
-		MaxAge:     config.LoggerConfig.MaxAge,
-		Compress:   config.LoggerConfig.Compress,
+		Filename:   loggerConfig.Filename,
+		MaxSize:    loggerConfig.MaxSize,
+		MaxBackups: loggerConfig.MaxBackups,
+		MaxAge:     loggerConfig.MaxAge,
+		Compress:   loggerConfig.Compress,
 	}
 
 	core := zapcore.NewCore(
 		encoder,
 		zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook)),
 		level)
-	return &LoggerZap{zap.New(core, zap.AddCaller())}
+	return &Zap{zap.New(core, zap.AddCaller())}
 }
 
 func getEncoderLog() zapcore.Encoder {
@@ -54,7 +54,7 @@ func getEncoderLog() zapcore.Encoder {
 	encodeConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	// ts -> time
 	encodeConfig.TimeKey = "time"
-	// from info INFO
+	// info -> INFO
 	encodeConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	//"caller":"cli/main.log.go:24
 	encodeConfig.EncodeCaller = zapcore.ShortCallerEncoder
