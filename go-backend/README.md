@@ -14,6 +14,24 @@
 - [Lumberjack](https://github.com/natefinch/lumberjack)
 - [Gorm](https://gorm.io/docs/index.html)
 
+## Technology stack
+
+> **Note:**
+>
+> To switch to a difference enviroment, you need to set the environment variable
+>
+> On Windows:
+>
+> ```sh
+> setx GO_PROFILE dev
+> ```
+>
+> On Linux:
+>
+> ```sh
+> export GO_PROFILE=dev
+> ```
+
 ### Init Go Module
 
 Create folder project

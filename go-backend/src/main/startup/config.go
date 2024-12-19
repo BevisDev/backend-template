@@ -2,15 +2,21 @@ package startup
 
 import (
 	"log"
+	"os"
 
 	"github.com/BevisDev/backend-template/src/main/global"
 	"github.com/spf13/viper"
 )
 
 func LoadConfig() {
+	profile := os.Getenv("GO_PROFILE")
+	if profile == "" {
+		profile = "dev" // set default
+	}
+
 	v := viper.New()
 	v.AddConfigPath("../../")
-	v.SetConfigName("dev")
+	v.SetConfigName(profile)
 	v.SetConfigType("yaml")
 
 	// read config

@@ -5,6 +5,7 @@ server:
     - 127.0.0.1
   port: :8089
   version: 1.0.0
+  timezone: Asia/Ho_Chi_Minh
 
 databases:
   mysql:
@@ -23,9 +24,8 @@ databases:
       - mydatabase333
 
 logger:
-  logLevel: debug
-  fileName: ./log
-  maxSize: 10
+  logDir: ./logs
+  maxSize: 5
   maxBackup: 3
   maxAge: 28
   compress: true

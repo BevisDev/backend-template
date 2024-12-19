@@ -5,9 +5,10 @@ type AppConfig struct {
 	ServerConfig struct {
 		Name           string   `mapstructure:"name"`
 		Profile        string   `mapstructure:"profile"`
+		TrustedProxies []string `mapstructure:"trustedProxies"`
 		Port           string   `mapstructure:"port"`
 		Version        string   `mapstructure:"version"`
-		TrustedProxies []string `mapstructure:"trustedProxies"`
+		Timezone       string   `mapstructure:"timezone"`
 	} `mapstructure:"server"`
 
 	// Databases
@@ -18,8 +19,7 @@ type AppConfig struct {
 
 	// LOGGER
 	LoggerConfig struct {
-		LogLevel   string `mapstructure:"logLevel"`
-		Filename   string `mapstructure:"filename"`
+		LogDir     string `mapstructure:"logDir"`
 		MaxSize    int    `mapstructure:"maxSize"`
 		MaxBackups int    `mapstructure:"maxBackups"`
 		MaxAge     int    `mapstructure:"maxAge"`
