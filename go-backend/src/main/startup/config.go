@@ -15,7 +15,7 @@ func LoadConfig() {
 	}
 
 	v := viper.New()
-	v.AddConfigPath("../../")
+	v.AddConfigPath("./")
 	v.SetConfigName(profile)
 	v.SetConfigType("yaml")
 
@@ -30,7 +30,7 @@ func LoadConfig() {
 
 	serverConfig := global.AppConfig.ServerConfig
 	log.Println("================================")
-	log.Printf("Load configuration profile %v successful", serverConfig.Profile)
-	log.Printf("Welcome to %v version %v ", serverConfig.Name, serverConfig.Version)
+	log.Printf("Load configuration profile %s successful", serverConfig.Profile)
+	log.Printf("Welcome to %s version %s ", serverConfig.Name, serverConfig.Version)
 	log.Println("================================")
 }

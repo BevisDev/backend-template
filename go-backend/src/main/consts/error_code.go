@@ -13,5 +13,7 @@ var message = map[int]string{
 	OK:             "Success",
 	Created:        "Created",
 	InvalidRequest: "Invalid Request",
+	Unauthorized:   "You are not Authorized",
+	NotFound:       "Not Found",
 	ServerError:    "Server has error",
 }

@@ -23,14 +23,39 @@
 > On Windows:
 >
 > ```sh
-> setx GO_PROFILE dev
+> $ setx GO_PROFILE dev
 > ```
 >
 > On Linux:
 >
 > ```sh
-> export GO_PROFILE=dev
+> $ export GO_PROFILE=dev
 > ```
+
+### Getting Makefile Tools
+
+To install `make`
+
+On Windows: using <b>Chocolatey</b>
+
+Open PowerShell with <b>Administrator privileges </b> and run the following command:
+
+```sh
+$ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+```
+
+After Chocolatey is installed, you can install `make` by running the following command in the PowerShell or Command Prompt:
+
+```sh
+$ choco install make
+```
+
+On Linux using `apt` to install
+
+```sh
+$ sudo apt update
+$ sudo apt install make
+```
 
 ### Init Go Module
 

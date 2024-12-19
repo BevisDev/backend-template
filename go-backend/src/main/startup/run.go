@@ -21,7 +21,7 @@ func Run() {
 	time.Local = location
 
 	// logger
-	logger.NewLogger()
+	logger.Info("LOGGER is started {}...", true)
 
 	// router
 	r := InitRouter()
