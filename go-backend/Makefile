@@ -16,4 +16,4 @@ build:
 # run the application
 run: 
 	@echo "Running the application..."
-	go run $(MAIN_FILE)
+	@go run $(MAIN_FILE)
