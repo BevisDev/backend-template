@@ -19,7 +19,8 @@ type AppConfig struct {
 
 	// Logger
 	LoggerConfig struct {
-		IsSplit    string `mapstructure:"isSplit"`
+		IsSplit    bool   `mapstructure:"isSplit"`
+		CronTime   string `mapstructure:"cronTime"`
 		LogDir     string `mapstructure:"logDir"`
 		MaxSize    int    `mapstructure:"maxSize"`
 		MaxBackups int    `mapstructure:"maxBackups"`

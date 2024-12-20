@@ -2,14 +2,17 @@ package logger
 
 import (
 	"fmt"
-	"os"
-	"strings"
-	"sync"
-
+	"github.com/BevisDev/backend-template/src/main/consts"
 	"github.com/BevisDev/backend-template/src/main/global"
 	"github.com/natefinch/lumberjack"
+	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
 )
 
 var (
@@ -36,10 +39,10 @@ func initLogger() {
 func getEncoderLog() zapcore.Encoder {
 	var encodeConfig zapcore.EncoderConfig
 	appConfig := global.AppConfig
-	isDev := appConfig.ServerConfig.Profile == "dev"
+	profile := appConfig.ServerConfig.Profile
 
 	// handle profile prod
-	if appConfig.ServerConfig.Profile == "prod" {
+	if profile == "prod" {
 		encodeConfig = zap.NewProductionEncoderConfig()
 		// 1716714967.877995 -> 2024-12-19T20:04:31.255+0700
 		encodeConfig.EncodeTime = zapcore.ISO8601TimeEncoder
@@ -62,7 +65,7 @@ func getEncoderLog() zapcore.Encoder {
 	encodeConfig.CallerKey = "caller"
 	encodeConfig.MessageKey = "message"
 
-	if isDev {
+	if profile == "dev" {
 		return zapcore.NewConsoleEncoder(encodeConfig)
 	}
 
@@ -70,13 +73,32 @@ func getEncoderLog() zapcore.Encoder {
 }
 
 func writeSync() zapcore.WriteSyncer {
-	loggerConfig := global.AppConfig.LoggerConfig
+	appConfig := global.AppConfig
+
+	// handle profile dev
+	if appConfig.ServerConfig.Profile == "dev" {
+		return zapcore.NewMultiWriteSyncer(
+			zapcore.AddSync(os.Stdout),
+		)
+	}
+
+	loggerConfig := appConfig.LoggerConfig
 	logger := lumberjack.Logger{
-		Filename:   loggerConfig.LogDir + "/log1.log",
+		Filename:   getFilename(loggerConfig.LogDir),
 		MaxSize:    loggerConfig.MaxSize,
 		MaxBackups: loggerConfig.MaxBackups,
 		MaxAge:     loggerConfig.MaxAge,
 		Compress:   loggerConfig.Compress,
+	}
+
+	// job runner to split log every day
+	if loggerConfig.IsSplit {
+		c := cron.New()
+		c.AddFunc(loggerConfig.CronTime, func() {
+			logger.Filename = getFilename(loggerConfig.LogDir)
+			logger.Close()
+		})
+		c.Start()
 	}
 
 	return zapcore.NewMultiWriteSyncer(
@@ -85,8 +107,10 @@ func writeSync() zapcore.WriteSyncer {
 	)
 }
 
-func scheduleLogRotation() {
-
+func getFilename(folder string) string {
+	now := time.Now().Format(consts.YYYY_MM_DD)
+	timeNow := time.Now().Format(consts.TIME_FULL)
+	return filepath.Join(folder, now, "app_"+timeNow+".log")
 }
 
 func log(level zapcore.Level, msg string, args ...interface{}) {
@@ -99,19 +123,22 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 		message = msg
 	}
 
+	// skip caller before
+	logging := logger.sugarLogger.WithOptions(zap.AddCallerSkip(2))
+
 	switch level {
 	case zapcore.InfoLevel:
-		logger.sugarLogger.Info(message)
+		logging.Info(message)
 	case zapcore.WarnLevel:
-		logger.sugarLogger.Error(message)
+		logging.Warn(message)
 	case zapcore.ErrorLevel:
-		logger.sugarLogger.Warn(message)
+		logging.Error(message)
 	case zapcore.FatalLevel:
-		logger.sugarLogger.Fatal(message)
+		logging.Fatal(message)
 	case zapcore.PanicLevel:
-		logger.sugarLogger.Panic(message)
+		logging.Panic(message)
 	default:
-		logger.sugarLogger.Info(message)
+		logging.Info(message)
 	}
 }
 

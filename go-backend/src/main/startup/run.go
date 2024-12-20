@@ -15,9 +15,10 @@ func Run() {
 	logger.Info("LOGGER is started {}...", true)
 	// Defer Sync to ensure logs are flushed before exiting
 	defer logger.Sync()
+	// recover global when occur exception
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error("Recovered in run.go: {}", r)
+			logger.Error("Recovered in run.go:20 with {}", r)
 		}
 	}()
 

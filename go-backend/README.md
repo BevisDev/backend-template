@@ -12,6 +12,7 @@
 - [Viper](https://github.com/spf13/viper)
 - [Zap](https://github.com/uber-go/zap)
 - [Lumberjack](https://github.com/natefinch/lumberjack)
+- [Cron](https://github.com/robfig/cron)
 - [Gorm](https://gorm.io/docs/index.html)
 
 ## Technology stack
@@ -36,9 +37,9 @@
 
 To install `make`
 
-On Windows: using <b>Chocolatey</b>
+On Windows: using **Chocolatey**
 
-Open PowerShell with <b>Administrator privileges </b> and run the following command:
+Open PowerShell with **Administrator privileges** and run the following command:
 
 ```sh
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
@@ -125,3 +126,36 @@ For writting logs to rolling files
 ```sh
 go get github.com/natefinch/lumberjack
 ```
+
+## Getting Cron
+
+To schedule job runner
+
+```sh
+go get github.com/robfig/cron/v3@v3.0.0
+```
+
+**Cron Expression Format**
+
+A cron expression represents a set of times, using 6 space-separated fields.
+
+### Example:
+
+```go
+c := cron.New(cron.WithSeconds())
+// second minute hour day month weekday
+c.AddFunc("0 * * * * *", func() { 
+    fmt.Println("Running every minute at the 0th second!") 
+})
+c.Start()
+```
+
+| Field name   | Mandatory? | Allowed values  | Allowed special characters |
+|--------------|------------|-----------------|----------------------------|
+| Seconds      | Yes        | 0-59            | * / , -                    |
+| Minutes      | Yes        | 0-59            | * / , -                    |
+| Hours        | Yes        | 0-23            | * / , -                    |
+| Day of month | Yes        | 1-31            | * / , - ?                  |
+| Month        | Yes        | 1-12 or JAN-DEC | * / , -                    |
+| Day of week  | Yes        | 0-6 or SUN-SAT  | * / , - ?                  |
+

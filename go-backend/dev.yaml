@@ -25,6 +25,7 @@ databases:
 
 logger:
   isSplit: false
+  cronTime: 0 0 * * *
   logDir: ./logs
   maxSize: 5
   maxBackup: 3
