@@ -24,6 +24,7 @@ databases:
       - mydatabase333
 
 logger:
+  isSplit: false
   logDir: ./logs
   maxSize: 5
   maxBackup: 3

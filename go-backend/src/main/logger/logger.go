@@ -26,8 +26,9 @@ func initLogger() {
 		encoder := getEncoderLog()
 		writeSync := writeSync()
 		core := zapcore.NewCore(encoder, writeSync, zapcore.InfoLevel)
+		sugarLogger := zap.New(core, zap.AddCaller()).Sugar()
 		logger = &LoggerWrapper{
-			sugarLogger: zap.New(core, zap.AddCaller()).Sugar(),
+			sugarLogger: sugarLogger,
 		}
 	})
 }
@@ -84,6 +85,10 @@ func writeSync() zapcore.WriteSyncer {
 	)
 }
 
+func scheduleLogRotation() {
+
+}
+
 func log(level zapcore.Level, msg string, args ...interface{}) {
 	var message string
 
@@ -101,6 +106,10 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 		logger.sugarLogger.Error(message)
 	case zapcore.ErrorLevel:
 		logger.sugarLogger.Warn(message)
+	case zapcore.FatalLevel:
+		logger.sugarLogger.Fatal(message)
+	case zapcore.PanicLevel:
+		logger.sugarLogger.Panic(message)
 	default:
 		logger.sugarLogger.Info(message)
 	}
@@ -135,4 +144,26 @@ func Warn(msg string, args ...interface{}) {
 		initLogger()
 	}
 	log(zapcore.WarnLevel, msg, args...)
+}
+
+func Fatal(msg string, args ...interface{}) {
+	if logger == nil {
+		initLogger()
+	}
+	log(zapcore.FatalLevel, msg, args...)
+}
+
+func Panic(msg string, args ...interface{}) {
+	if logger == nil {
+		initLogger()
+	}
+	log(zapcore.PanicLevel, msg, args...)
+}
+
+func Sync() {
+	if logger != nil {
+		if err := logger.sugarLogger.Sync(); err != nil {
+			Fatal("Error syncing logger: {}", zap.Error(err))
+		}
+	}
 }

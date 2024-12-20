@@ -17,8 +17,9 @@ type AppConfig struct {
 		PostgreSqlConfig DatabaseProps `mapstructure:"postgresql"`
 	} `mapstructure:"databases"`
 
-	// LOGGER
+	// Logger
 	LoggerConfig struct {
+		IsSplit    string `mapstructure:"isSplit"`
 		LogDir     string `mapstructure:"logDir"`
 		MaxSize    int    `mapstructure:"maxSize"`
 		MaxBackups int    `mapstructure:"maxBackups"`
