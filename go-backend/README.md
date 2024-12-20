@@ -23,13 +23,13 @@
 > On Windows:
 >
 > ```sh
-> $ setx GO_PROFILE dev
+> setx GO_PROFILE dev
 > ```
 >
 > On Linux:
 >
 > ```sh
-> $ export GO_PROFILE=dev
+> export GO_PROFILE=dev
 > ```
 
 ### Getting Makefile Tools
@@ -41,20 +41,20 @@ On Windows: using <b>Chocolatey</b>
 Open PowerShell with <b>Administrator privileges </b> and run the following command:
 
 ```sh
-$ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 ```
 
 After Chocolatey is installed, you can install `make` by running the following command in the PowerShell or Command Prompt:
 
 ```sh
-$ choco install make
+choco install make
 ```
 
 On Linux using `apt` to install
 
 ```sh
-$ sudo apt update
-$ sudo apt install make
+sudo apt update
+sudo apt install make
 ```
 
 ### Init Go Module
@@ -62,20 +62,20 @@ $ sudo apt install make
 Create folder project
 
 ```sh
-$ mkdir go-backend
-$ cd go-backend
+mkdir go-backend
+cd go-backend
 ```
 
 Init Go module
 
 ```sh
-$ go mod init github.com/BevisDev/go-backend
+go mod init github.com/BevisDev/go-backend
 ```
 
 ### Getting Framework
 
 ```sh
-$ go get -u github.com/gin-gonic/gin
+go get -u github.com/gin-gonic/gin
 ```
 
 ### Running Gin
@@ -103,7 +103,7 @@ func main() {
 To run the code, use the `go run` command, like:
 
 ```sh
-$ go run main.go
+go run main.go
 ```
 
 Then visit [`0.0.0.0:8080/ping`](http://0.0.0.0:8080/ping) in your browser to see the response!
@@ -111,17 +111,17 @@ Then visit [`0.0.0.0:8080/ping`](http://0.0.0.0:8080/ping) in your browser to se
 ## Getting Viper
 
 ```sh
-$ go get github.com/spf13/viper
+go get github.com/spf13/viper
 ```
 
 ## Getting handler Logger
 
 ```sh
-$ go get -u go.uber.org/zap
+go get -u go.uber.org/zap
 ```
 
 For writting logs to rolling files
 
 ```sh
-$ go get github.com/natefinch/lumberjack
+go get github.com/natefinch/lumberjack
 ```
