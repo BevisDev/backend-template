@@ -15,6 +15,10 @@
 - [Cron](https://github.com/robfig/cron)
 - [Gorm](https://gorm.io/docs/index.html)
 
+### Utilities:
+
+- [UUID](https://github.com/google/uuid)
+
 ## Technology stack
 
 > **Note:**

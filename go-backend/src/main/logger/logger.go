@@ -109,8 +109,7 @@ func writeSync() zapcore.WriteSyncer {
 
 func getFilename(folder string) string {
 	now := time.Now().Format(consts.YYYY_MM_DD)
-	timeNow := time.Now().Format(consts.TIME_FULL)
-	return filepath.Join(folder, now, "app_"+timeNow+".log")
+	return filepath.Join(folder, now, "app.log")
 }
 
 func log(level zapcore.Level, msg string, args ...interface{}) {
@@ -145,7 +144,7 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 func formatMessage(msg string, args ...interface{}) string {
 	var message string
 	if !strings.Contains(msg, "%") {
-		message = strings.ReplaceAll(msg, "{}", "%v")
+		message = strings.ReplaceAll(msg, "{}", "%+v")
 	} else {
 		message = msg
 	}
