@@ -2,8 +2,8 @@ package logger
 
 import (
 	"fmt"
-	"github.com/BevisDev/backend-template/src/main/consts"
-	"github.com/BevisDev/backend-template/src/main/global"
+	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/BevisDev/backend-template/src/main/helper/datetime"
 	"github.com/natefinch/lumberjack"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
@@ -38,7 +38,7 @@ func initLogger() {
 
 func getEncoderLog() zapcore.Encoder {
 	var encodeConfig zapcore.EncoderConfig
-	appConfig := global.AppConfig
+	appConfig := config.AppConfig
 	profile := appConfig.ServerConfig.Profile
 
 	// handle profile prod
@@ -73,7 +73,7 @@ func getEncoderLog() zapcore.Encoder {
 }
 
 func writeSync() zapcore.WriteSyncer {
-	appConfig := global.AppConfig
+	appConfig := config.AppConfig
 
 	// handle profile dev
 	if appConfig.ServerConfig.Profile == "dev" {
@@ -108,7 +108,7 @@ func writeSync() zapcore.WriteSyncer {
 }
 
 func getFilename(folder string) string {
-	now := time.Now().Format(consts.YYYY_MM_DD)
+	now := time.Now().Format(datetime.YYYY_MM_DD)
 	return filepath.Join(folder, now, "app.log")
 }
 

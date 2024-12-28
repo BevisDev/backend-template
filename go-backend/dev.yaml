@@ -6,6 +6,8 @@ server:
   port: :8089
   version: 1.0.0
   timezone: Asia/Ho_Chi_Minh
+  clientTimeout: 30
+  serverTimeout: 30
 
 databases:
   mysql:

@@ -1,16 +1,16 @@
 package startup
 
 import (
+	"github.com/BevisDev/backend-template/src/main/config"
 	"net/http"
 
-	"github.com/BevisDev/backend-template/src/main/global"
 	"github.com/BevisDev/backend-template/src/main/router"
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {
 	var r *gin.Engine
-	serverConfig := global.AppConfig.ServerConfig
+	serverConfig := config.AppConfig.ServerConfig
 
 	if serverConfig.Profile == "prod" {
 		gin.SetMode(gin.ReleaseMode)
