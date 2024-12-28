@@ -20,19 +20,18 @@ type RestClient struct {
 	URL         string
 	Params      map[string]any
 	Header      map[string]string
-	Body        interface{}
+	Body        any
 	ContentType string
+	Result      any
 }
 
-func NewRestClient(url string) *RestClient {
-	return &RestClient{
-		URL:         url,
-		Header:      make(map[string]string),
-		ContentType: "application/json",
-	}
+type Response struct {
+	StatusCode int
+	Header     http.Header
+	Body       any
 }
 
-func POST(restClient RestClient) {
+func POST(restClient RestClient) (*Response, error) {
 	var body []byte
 	var err error
 
@@ -63,6 +62,18 @@ func POST(restClient RestClient) {
 		// logger
 	}
 
+	var response Response
+	response.StatusCode = resp.StatusCode
+	response.Header = resp.Header
+
+	// mapping result
+	if restClient.Result != nil {
+		response.Body = json.ToStruct(respBody, restClient.Result)
+	} else {
+		response.Body = json.ToJSONStr(respBody)
+	}
+
+	return &response, nil
 }
 
 func addHeaders(r *http.Request, headers map[string]string) {
