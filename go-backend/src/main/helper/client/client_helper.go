@@ -70,7 +70,7 @@ func POST(restClient RestClient) (*Response, error) {
 	if restClient.Result != nil {
 		response.Body = json.ToStruct(respBody, restClient.Result)
 	} else {
-		response.Body = json.ToJSONStr(respBody)
+		response.Body = json.FromJSONBytes(respBody)
 	}
 
 	return &response, nil

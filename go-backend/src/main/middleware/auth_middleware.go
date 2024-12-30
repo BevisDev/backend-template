@@ -30,10 +30,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		requestID := c.GetHeader("X-Request-ID")
-		if helper.IsNilOrEmpty(requestID) {
-			requestID = uuid.NewString()
-			c.Writer.Header().Set("X-Request-ID", requestID)
+		requestId := c.GetHeader("X-Request-Id")
+		if helper.IsNilOrEmpty(requestId) {
+			requestId = uuid.NewString()
+			c.Writer.Header().Set("X-Request-Id", requestId)
 		}
 
 		var req request.Data

@@ -1,10 +1,10 @@
 package startup
 
 import (
+	"github.com/BevisDev/backend-template/src/main/api/v1"
 	"github.com/BevisDev/backend-template/src/main/config"
 	"net/http"
 
-	"github.com/BevisDev/backend-template/src/main/router"
 	"github.com/gin-gonic/gin"
 )
 
@@ -34,10 +34,10 @@ func InitRouter() *gin.Engine {
 	api := r.Group("/api")
 	{
 		// version 1
-		v1 := api.Group("/v1")
+		version1 := api.Group("/v1")
 		{
 			// router auth
-			router.InitAuthRouterGroup(v1)
+			v1.AuthApiGroup(version1)
 		}
 	}
 
