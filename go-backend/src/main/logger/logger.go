@@ -17,11 +17,24 @@ import (
 
 var (
 	once   sync.Once
-	logger *LoggerWrapper
+	logger *zap.SugaredLogger
 )
 
-type LoggerWrapper struct {
-	sugarLogger *zap.SugaredLogger
+type RequestLogger struct {
+	RequestId string
+	URL       string
+	Query     string
+	Method    string
+	Header    any
+	Body      any
+}
+
+type ResponseLogger struct {
+	RequestId string
+	Duration  time.Duration
+	Status    int
+	Header    any
+	Body      any
 }
 
 func initLogger() {
@@ -30,9 +43,7 @@ func initLogger() {
 		writeSync := writeSync()
 		core := zapcore.NewCore(encoder, writeSync, zapcore.InfoLevel)
 		sugarLogger := zap.New(core, zap.AddCaller()).Sugar()
-		logger = &LoggerWrapper{
-			sugarLogger: sugarLogger,
-		}
+		logger = sugarLogger
 	})
 }
 
@@ -77,9 +88,7 @@ func writeSync() zapcore.WriteSyncer {
 
 	// handle profile dev
 	if appConfig.ServerConfig.Profile == "dev" {
-		return zapcore.NewMultiWriteSyncer(
-			zapcore.AddSync(os.Stdout),
-		)
+		return zapcore.AddSync(os.Stdout)
 	}
 
 	loggerConfig := appConfig.LoggerConfig
@@ -101,10 +110,7 @@ func writeSync() zapcore.WriteSyncer {
 		c.Start()
 	}
 
-	return zapcore.NewMultiWriteSyncer(
-		zapcore.AddSync(os.Stdout),
-		zapcore.AddSync(&logger),
-	)
+	return zapcore.AddSync(&logger)
 }
 
 func getFilename(folder string) string {
@@ -123,7 +129,7 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 	}
 
 	// skip caller before
-	logging := logger.sugarLogger.WithOptions(zap.AddCallerSkip(2))
+	logging := logger.WithOptions(zap.AddCallerSkip(2))
 
 	switch level {
 	case zapcore.InfoLevel:
@@ -149,6 +155,40 @@ func formatMessage(msg string, args ...interface{}) string {
 		message = msg
 	}
 	return fmt.Sprintf(message, args...)
+}
+
+func Sync() {
+	if logger != nil {
+		if err := logger.Sync(); err != nil {
+			Error("Error syncing logger: {}", err)
+		}
+	}
+}
+
+func RequestInfo(req *RequestLogger) {
+	if logger == nil {
+		initLogger()
+	}
+	logger.Info("REQUEST INFO",
+		zap.String("RequestId", req.RequestId),
+		zap.String("URL", req.URL),
+		zap.String("Method", req.Method),
+		zap.Any("Header", req.Header),
+		zap.Any("Body", req.Body),
+	)
+}
+
+func ResponseInfo(resp *ResponseLogger) {
+	if logger == nil {
+		initLogger()
+	}
+	logger.Info("RESPONSE INFO",
+		zap.String("RequestId", resp.RequestId),
+		zap.Int("Status", resp.Status),
+		zap.Duration("Duration", resp.Duration),
+		zap.Any("Header", resp.Header),
+		zap.Any("Body", resp.Body),
+	)
 }
 
 func Info(msg string, args ...interface{}) {
@@ -184,12 +224,4 @@ func Panic(msg string, args ...interface{}) {
 		initLogger()
 	}
 	log(zapcore.PanicLevel, msg, args...)
-}
-
-func Sync() {
-	if logger != nil {
-		if err := logger.sugarLogger.Sync(); err != nil {
-			Fatal("Error syncing logger: {}", zap.Error(err))
-		}
-	}
 }

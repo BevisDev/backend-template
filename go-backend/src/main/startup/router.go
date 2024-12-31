@@ -3,6 +3,7 @@ package startup
 import (
 	"github.com/BevisDev/backend-template/src/main/api/v1"
 	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/BevisDev/backend-template/src/main/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,6 @@ func InitRouter() *gin.Engine {
 		r = gin.Default()
 	}
 
-	// use Middlewares
-
 	// use Routers
 	// ping to health check system
 	r.GET("/ping", func(c *gin.Context) {
@@ -30,14 +29,17 @@ func InitRouter() *gin.Engine {
 			"message": "pong",
 		})
 	})
+	
+	// use Middlewares
+	r.Use(middleware.AuthMiddleware())
 
 	api := r.Group("/api")
 	{
 		// version 1
-		version1 := api.Group("/v1")
+		ver1 := api.Group("/v1")
 		{
 			// router auth
-			v1.AuthApiGroup(version1)
+			v1.AuthApiGroup(ver1)
 		}
 	}
 
