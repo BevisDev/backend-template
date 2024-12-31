@@ -2,8 +2,8 @@ package logger
 
 import (
 	"fmt"
-	"github.com/BevisDev/backend-template/src/main/consts"
-	"github.com/BevisDev/backend-template/src/main/global"
+	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/BevisDev/backend-template/src/main/helper/datetime"
 	"github.com/natefinch/lumberjack"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
@@ -17,11 +17,24 @@ import (
 
 var (
 	once   sync.Once
-	logger *LoggerWrapper
+	logger *zap.SugaredLogger
 )
 
-type LoggerWrapper struct {
-	sugarLogger *zap.SugaredLogger
+type RequestLogger struct {
+	RequestId string
+	URL       string
+	Query     string
+	Method    string
+	Header    any
+	Body      any
+}
+
+type ResponseLogger struct {
+	RequestId string
+	Duration  time.Duration
+	Status    int
+	Header    any
+	Body      any
 }
 
 func initLogger() {
@@ -30,15 +43,13 @@ func initLogger() {
 		writeSync := writeSync()
 		core := zapcore.NewCore(encoder, writeSync, zapcore.InfoLevel)
 		sugarLogger := zap.New(core, zap.AddCaller()).Sugar()
-		logger = &LoggerWrapper{
-			sugarLogger: sugarLogger,
-		}
+		logger = sugarLogger
 	})
 }
 
 func getEncoderLog() zapcore.Encoder {
 	var encodeConfig zapcore.EncoderConfig
-	appConfig := global.AppConfig
+	appConfig := config.AppConfig
 	profile := appConfig.ServerConfig.Profile
 
 	// handle profile prod
@@ -73,13 +84,11 @@ func getEncoderLog() zapcore.Encoder {
 }
 
 func writeSync() zapcore.WriteSyncer {
-	appConfig := global.AppConfig
+	appConfig := config.AppConfig
 
 	// handle profile dev
 	if appConfig.ServerConfig.Profile == "dev" {
-		return zapcore.NewMultiWriteSyncer(
-			zapcore.AddSync(os.Stdout),
-		)
+		return zapcore.AddSync(os.Stdout)
 	}
 
 	loggerConfig := appConfig.LoggerConfig
@@ -101,16 +110,12 @@ func writeSync() zapcore.WriteSyncer {
 		c.Start()
 	}
 
-	return zapcore.NewMultiWriteSyncer(
-		zapcore.AddSync(os.Stdout),
-		zapcore.AddSync(&logger),
-	)
+	return zapcore.AddSync(&logger)
 }
 
 func getFilename(folder string) string {
-	now := time.Now().Format(consts.YYYY_MM_DD)
-	timeNow := time.Now().Format(consts.TIME_FULL)
-	return filepath.Join(folder, now, "app_"+timeNow+".log")
+	now := time.Now().Format(datetime.YYYY_MM_DD)
+	return filepath.Join(folder, now, "app.log")
 }
 
 func log(level zapcore.Level, msg string, args ...interface{}) {
@@ -124,7 +129,7 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 	}
 
 	// skip caller before
-	logging := logger.sugarLogger.WithOptions(zap.AddCallerSkip(2))
+	logging := logger.WithOptions(zap.AddCallerSkip(2))
 
 	switch level {
 	case zapcore.InfoLevel:
@@ -145,11 +150,45 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 func formatMessage(msg string, args ...interface{}) string {
 	var message string
 	if !strings.Contains(msg, "%") {
-		message = strings.ReplaceAll(msg, "{}", "%v")
+		message = strings.ReplaceAll(msg, "{}", "%+v")
 	} else {
 		message = msg
 	}
 	return fmt.Sprintf(message, args...)
+}
+
+func Sync() {
+	if logger != nil {
+		if err := logger.Sync(); err != nil {
+			Error("Error syncing logger: {}", err)
+		}
+	}
+}
+
+func RequestInfo(req *RequestLogger) {
+	if logger == nil {
+		initLogger()
+	}
+	logger.Info("REQUEST INFO",
+		zap.String("RequestId", req.RequestId),
+		zap.String("URL", req.URL),
+		zap.String("Method", req.Method),
+		zap.Any("Header", req.Header),
+		zap.Any("Body", req.Body),
+	)
+}
+
+func ResponseInfo(resp *ResponseLogger) {
+	if logger == nil {
+		initLogger()
+	}
+	logger.Info("RESPONSE INFO",
+		zap.String("RequestId", resp.RequestId),
+		zap.Int("Status", resp.Status),
+		zap.Duration("Duration", resp.Duration),
+		zap.Any("Header", resp.Header),
+		zap.Any("Body", resp.Body),
+	)
 }
 
 func Info(msg string, args ...interface{}) {
@@ -185,12 +224,4 @@ func Panic(msg string, args ...interface{}) {
 		initLogger()
 	}
 	log(zapcore.PanicLevel, msg, args...)
-}
-
-func Sync() {
-	if logger != nil {
-		if err := logger.sugarLogger.Sync(); err != nil {
-			Fatal("Error syncing logger: {}", zap.Error(err))
-		}
-	}
 }

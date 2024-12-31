@@ -1,6 +1,9 @@
-package utils
+package helper
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+)
 
 func IsNilOrEmpty(value interface{}) bool {
 	if value == nil {
@@ -11,7 +14,7 @@ func IsNilOrEmpty(value interface{}) bool {
 	case reflect.Invalid:
 		return true
 	case reflect.String:
-		return v.Len() == 0
+		return strings.TrimSpace(v.String()) == ""
 	case reflect.Array, reflect.Slice:
 		return v.Len() == 0
 	case reflect.Map:

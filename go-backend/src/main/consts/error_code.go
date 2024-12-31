@@ -1,19 +1,39 @@
 package consts
 
 const (
-	OK             = 1000
-	Created        = 1001
-	InvalidRequest = 4000
-	Unauthorized   = 4002
-	NotFound       = 4004
-	ServerError    = 5000
+	// ServerError server error
+	ServerError        = 5000
+	ServerTimeout      = 5001
+	ServerDown         = 5002
+	ServiceUnavailable = 5003
+
+	// OK code success
+	OK      = 1000
+	Created = 1001
+
+	// InvalidRequest client error
+	InvalidRequest      = 4000
+	InvalidCredentials  = 4001
+	NotAuthorizedAccess = 4002
+	InvalidAccessToken  = 4003
+	InvalidSignature    = 4004
 )
 
-var message = map[int]string{
-	OK:             "Success",
-	Created:        "Created",
-	InvalidRequest: "Invalid Request",
-	Unauthorized:   "You are not Authorized",
-	NotFound:       "Not Found",
-	ServerError:    "Server has error",
+var Message = map[int]string{
+	// message server error
+	ServerError:        "Server has error",
+	ServerTimeout:      "Server gateway is timed out",
+	ServerDown:         "Server is down or under maintenance",
+	ServiceUnavailable: "The service is temporarily unavailable",
+
+	// message success
+	OK:      "Success",
+	Created: "Created",
+
+	// message client error
+	InvalidRequest:      "Invalid Request",
+	InvalidCredentials:  "Security credentials is incorrect",
+	NotAuthorizedAccess: "You are not authorized to access this resource",
+	InvalidAccessToken:  "Access token is invalid",
+	InvalidSignature:    "Signature is invalid",
 }

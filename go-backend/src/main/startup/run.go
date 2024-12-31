@@ -1,7 +1,7 @@
 package startup
 
 import (
-	"github.com/BevisDev/backend-template/src/main/global"
+	"github.com/BevisDev/backend-template/src/main/config"
 	"github.com/BevisDev/backend-template/src/main/logger"
 	"time"
 )
@@ -9,10 +9,11 @@ import (
 func Run() {
 	// load configuration
 	LoadConfig()
-	serverConfig := global.AppConfig.ServerConfig
+	serverConfig := config.AppConfig.ServerConfig
 
 	// init logger
 	logger.Info("LOGGER is started {}...", true)
+	
 	// Defer Sync to ensure logs are flushed before exiting
 	defer logger.Sync()
 	// recover global when occur exception

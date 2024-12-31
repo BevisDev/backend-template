@@ -1,6 +1,8 @@
 package config
 
-type AppConfig struct {
+var AppConfig Config
+
+type Config struct {
 	// Server
 	ServerConfig struct {
 		Name           string   `mapstructure:"name"`
@@ -9,6 +11,8 @@ type AppConfig struct {
 		Port           string   `mapstructure:"port"`
 		Version        string   `mapstructure:"version"`
 		Timezone       string   `mapstructure:"timezone"`
+		ClientTimeout  int      `mapstructure:"clientTimeout"`
+		ServerTimeout  int      `mapstructure:"serverTimeout"`
 	} `mapstructure:"server"`
 
 	// Databases

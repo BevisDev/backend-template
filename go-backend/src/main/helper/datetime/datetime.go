@@ -1,4 +1,4 @@
-package consts
+package datetime
 
 const (
 	YYYY_MM_DD       = "2006-01-02"
@@ -11,11 +11,15 @@ const (
 	DATETIME_FULL  = "2006-01-02T15:04:05Z07:00"
 	DATETIME_NO_TZ = "2006-01-02 15:04:05.000"
 
-	// time
-	SECOND      = 1000
-	MINUTE      = 60 * SECOND
-	HOUR        = 60 * 60 * SECOND
-	DAY         = 24 * 60 * 60 * SECOND
+	// format time
 	TIME_FULL   = "150405"
 	TIME_NO_SEC = "1504"
+
+	// string time
+	Second = "Second"
+	Minute = "Minute"
+	Hour   = "Hour"
+	Day    = "Day"
+	Month  = "Month"
+	Year   = "Year"
 )
