@@ -3,7 +3,7 @@ package request
 import "time"
 
 type Data struct {
-	RequestID string      `json:"request_id,omitempty"`
+	State     string      `json:"state,omitempty"`
 	Data      interface{} `json:"data,omitempty"`
 	RequestAt *time.Time  `json:"request_at,omitempty"`
 }

@@ -2,7 +2,8 @@ package startup
 
 import (
 	"github.com/BevisDev/backend-template/src/main/config"
-	"github.com/BevisDev/backend-template/src/main/logger"
+	"github.com/BevisDev/backend-template/src/main/helper/logger"
+	"github.com/BevisDev/backend-template/src/main/helper/utils"
 	"time"
 )
 
@@ -12,14 +13,15 @@ func Run() {
 	serverConfig := config.AppConfig.ServerConfig
 
 	// init logger
-	logger.Info("LOGGER is started {}...", true)
-	
+	state := utils.GenUUID()
+	logger.Info(state, "LOGGER is started {}...", true)
+
 	// Defer Sync to ensure logs are flushed before exiting
-	defer logger.Sync()
+	defer logger.Sync(state)
 	// recover global when occur exception
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error("Recovered in run.go:20 with {}", r)
+			logger.Error(state, "Recovered in run.go:20 with {}", r)
 		}
 	}()
 
@@ -35,11 +37,11 @@ func Run() {
 
 	// set trusted domain
 	if err := r.SetTrustedProxies(serverConfig.TrustedProxies); err != nil {
-		logger.Panic("Error while setting trustedProxies: {}", err)
+		logger.Panic(state, "Error while setting trustedProxies: {}", err)
 	}
 
 	// run app
 	if err := r.Run(serverConfig.Port); err != nil {
-		logger.Panic("Error run the server failed: %v", err)
+		logger.Panic(state, "Error run the server failed: {}", err)
 	}
 }

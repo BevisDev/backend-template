@@ -29,9 +29,10 @@ func InitRouter() *gin.Engine {
 			"message": "pong",
 		})
 	})
-	
+
 	// use Middlewares
-	r.Use(middleware.AuthMiddleware())
+	r.Use(middleware.AuthHandler())
+	r.Use(middleware.LoggerHandler())
 
 	api := r.Group("/api")
 	{

@@ -17,24 +17,24 @@ import (
 
 var (
 	once   sync.Once
-	logger *zap.SugaredLogger
+	logger *zap.Logger
 )
 
 type RequestLogger struct {
-	RequestId string
-	URL       string
-	Query     string
-	Method    string
-	Header    any
-	Body      any
+	State  string
+	URL    string
+	Query  string
+	Method string
+	Header any
+	Body   any
 }
 
 type ResponseLogger struct {
-	RequestId string
-	Duration  time.Duration
-	Status    int
-	Header    any
-	Body      any
+	State       string
+	DurationSec time.Duration
+	Status      int
+	Header      any
+	Body        any
 }
 
 func initLogger() {
@@ -42,8 +42,8 @@ func initLogger() {
 		encoder := getEncoderLog()
 		writeSync := writeSync()
 		core := zapcore.NewCore(encoder, writeSync, zapcore.InfoLevel)
-		sugarLogger := zap.New(core, zap.AddCaller()).Sugar()
-		logger = sugarLogger
+		newLogger := zap.New(core, zap.AddCaller())
+		logger = newLogger
 	})
 }
 
@@ -118,7 +118,7 @@ func getFilename(folder string) string {
 	return filepath.Join(folder, now, "app.log")
 }
 
-func log(level zapcore.Level, msg string, args ...interface{}) {
+func log(level zapcore.Level, state string, msg string, args ...interface{}) {
 	var message string
 
 	// formater message
@@ -133,17 +133,15 @@ func log(level zapcore.Level, msg string, args ...interface{}) {
 
 	switch level {
 	case zapcore.InfoLevel:
-		logging.Info(message)
+		logging.Info(message, zap.String("state", state))
 	case zapcore.WarnLevel:
-		logging.Warn(message)
+		logging.Warn(message, zap.String("state", state))
 	case zapcore.ErrorLevel:
-		logging.Error(message)
-	case zapcore.FatalLevel:
-		logging.Fatal(message)
+		logging.Error(message, zap.String("state", state))
 	case zapcore.PanicLevel:
-		logging.Panic(message)
+		logging.Panic(message, zap.String("state", state))
 	default:
-		logging.Info(message)
+		logging.Info(message, zap.String("state", state))
 	}
 }
 
@@ -157,10 +155,10 @@ func formatMessage(msg string, args ...interface{}) string {
 	return fmt.Sprintf(message, args...)
 }
 
-func Sync() {
+func Sync(state string) {
 	if logger != nil {
 		if err := logger.Sync(); err != nil {
-			Error("Error syncing logger: {}", err)
+			Error(state, "Error syncing logger: {}", err)
 		}
 	}
 }
@@ -169,12 +167,13 @@ func RequestInfo(req *RequestLogger) {
 	if logger == nil {
 		initLogger()
 	}
-	logger.Info("REQUEST INFO",
-		zap.String("RequestId", req.RequestId),
-		zap.String("URL", req.URL),
-		zap.String("Method", req.Method),
-		zap.Any("Header", req.Header),
-		zap.Any("Body", req.Body),
+	logger.WithOptions(zap.AddCallerSkip(1)).Info("REQUEST INFO",
+		zap.String("state", req.State),
+		zap.String("url", req.URL),
+		zap.String("method", req.Method),
+		zap.String("query", req.Query),
+		zap.Any("header", req.Header),
+		zap.Any("body", req.Body),
 	)
 }
 
@@ -182,46 +181,39 @@ func ResponseInfo(resp *ResponseLogger) {
 	if logger == nil {
 		initLogger()
 	}
-	logger.Info("RESPONSE INFO",
-		zap.String("RequestId", resp.RequestId),
-		zap.Int("Status", resp.Status),
-		zap.Duration("Duration", resp.Duration),
-		zap.Any("Header", resp.Header),
-		zap.Any("Body", resp.Body),
+	logger.WithOptions(zap.AddCallerSkip(1)).Info("RESPONSE INFO",
+		zap.String("state", resp.State),
+		zap.Int("status", resp.Status),
+		zap.Float64("durationSec", resp.DurationSec.Seconds()),
+		zap.Any("header", resp.Header),
+		zap.Any("body", resp.Body),
 	)
 }
 
-func Info(msg string, args ...interface{}) {
+func Info(state string, msg string, args ...interface{}) {
 	if logger == nil {
 		initLogger()
 	}
-	log(zapcore.InfoLevel, msg, args...)
+	log(zapcore.InfoLevel, state, msg, args...)
 }
 
-func Error(msg string, args ...interface{}) {
+func Error(state string, msg string, args ...interface{}) {
 	if logger == nil {
 		initLogger()
 	}
-	log(zapcore.ErrorLevel, msg, args...)
+	log(zapcore.ErrorLevel, state, msg, args...)
 }
 
-func Warn(msg string, args ...interface{}) {
+func Warn(state string, msg string, args ...interface{}) {
 	if logger == nil {
 		initLogger()
 	}
-	log(zapcore.WarnLevel, msg, args...)
+	log(zapcore.WarnLevel, state, msg, args...)
 }
 
-func Fatal(msg string, args ...interface{}) {
+func Panic(state string, msg string, args ...interface{}) {
 	if logger == nil {
 		initLogger()
 	}
-	log(zapcore.FatalLevel, msg, args...)
-}
-
-func Panic(msg string, args ...interface{}) {
-	if logger == nil {
-		initLogger()
-	}
-	log(zapcore.PanicLevel, msg, args...)
+	log(zapcore.PanicLevel, state, msg, args...)
 }
