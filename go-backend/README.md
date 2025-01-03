@@ -13,7 +13,13 @@
 - [Zap](https://github.com/uber-go/zap)
 - [Lumberjack](https://github.com/natefinch/lumberjack)
 - [Cron](https://github.com/robfig/cron)
-- [Gorm](https://gorm.io/docs/index.html)
+
+### SQL Driver
+
+- [SQL Server](https://github.com/denisenkom/go-mssqldb)
+- [PostgreSQL](https://github.com/lib/pq)
+- [Oracle](https://github.com/godror/godror)
+- [Other Driver](https://go.dev/wiki/SQLDrivers)
 
 ### Utilities:
 

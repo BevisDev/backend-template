@@ -1,6 +1,7 @@
 package datetime
 
 import (
+	"github.com/BevisDev/backend-template/src/main/consts"
 	"time"
 )
 
@@ -26,17 +27,17 @@ func EndOfDay(date time.Time) time.Time {
 
 func AddTime(date time.Time, v int, kind string) time.Time {
 	switch kind {
-	case Second:
+	case consts.Second:
 		return date.Add(time.Duration(v) * time.Second)
-	case Minute:
+	case consts.Minute:
 		return date.Add(time.Duration(v) * time.Minute)
-	case Hour:
+	case consts.Hour:
 		return date.Add(time.Duration(v) * time.Hour)
-	case Day:
+	case consts.Day:
 		return date.AddDate(0, 0, v)
-	case Month:
+	case consts.Month:
 		return date.AddDate(0, v, 0)
-	case Year:
+	case consts.Year:
 		return date.AddDate(v, 0, 0)
 	default:
 		return date

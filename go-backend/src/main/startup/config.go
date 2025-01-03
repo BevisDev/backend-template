@@ -15,7 +15,7 @@ func LoadConfig() {
 	}
 
 	v := viper.New()
-	v.AddConfigPath("./")
+	v.AddConfigPath("./src/resources")
 	v.SetConfigName(profile)
 	v.SetConfigType("yaml")
 

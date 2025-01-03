@@ -58,9 +58,13 @@ func POST(req Request) *Response {
 
 	// send request
 	resp, err := client.Do(request)
+	if utils.IsNilOrEmpty(resp) {
+		logger.Error(req.State, "Error response is nil")
+		return &Response{HasError: true, Error: errors.New("error response is nil")}
+	}
 	if err != nil {
-		// handle error
-		logger.Error(req.State, "Error send request {}", err)
+		logger.Error(req.State, "Error while sending request {}", err)
+		// error timeout
 		var e net.Error
 		if errors.As(err, &e) && e.Timeout() {
 			return &Response{
@@ -69,13 +73,17 @@ func POST(req Request) *Response {
 				Error:     err,
 			}
 		}
+		return &Response{
+			HasError: true,
+			Error:    err,
+		}
 	}
 	defer resp.Body.Close()
 
 	// read body
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error(req.State, "Error whiling do request {}", err)
+		logger.Error(req.State, "Error while doing request {}", err)
 		return &Response{HasError: true, Error: err}
 	}
 

@@ -3,7 +3,8 @@ package logger
 import (
 	"fmt"
 	"github.com/BevisDev/backend-template/src/main/config"
-	"github.com/BevisDev/backend-template/src/main/helper/datetime"
+	"github.com/BevisDev/backend-template/src/main/consts"
+	"github.com/BevisDev/backend-template/src/main/helper/utils"
 	"github.com/natefinch/lumberjack"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
@@ -114,14 +115,18 @@ func writeSync() zapcore.WriteSyncer {
 }
 
 func getFilename(folder string) string {
-	now := time.Now().Format(datetime.YYYY_MM_DD)
+	now := time.Now().Format(consts.YYYY_MM_DD)
 	return filepath.Join(folder, now, "app.log")
 }
 
 func log(level zapcore.Level, state string, msg string, args ...interface{}) {
-	var message string
+	// check state
+	if utils.IsNilOrEmpty(state) {
+		state = utils.GenUUID()
+	}
 
 	// formater message
+	var message string
 	if len(args) != 0 {
 		message = formatMessage(msg, args...)
 	} else {

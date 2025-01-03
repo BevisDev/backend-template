@@ -21,7 +21,7 @@ func Run() {
 	// recover global when occur exception
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Error(state, "Recovered in run.go:20 with {}", r)
+			logger.Error(state, "Recovering... {}", r)
 		}
 	}()
 
