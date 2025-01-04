@@ -14,7 +14,7 @@ func Run() {
 
 	// init logger
 	state := utils.GenUUID()
-	logger.Info(state, "LOGGER is started {}...", true)
+	logger.Info(state, "LOGGER is started successfully {}", true)
 
 	// Defer Sync to ensure logs are flushed before exiting
 	defer logger.Sync(state)
@@ -28,7 +28,7 @@ func Run() {
 	// set time zone
 	location, err := time.LoadLocation(serverConfig.Timezone)
 	if err != nil {
-		logger.Panic("Error set timezone {}: {}", serverConfig.Timezone, err)
+		logger.Panic(state, "Error set timezone {}: {}", serverConfig.Timezone, err)
 	}
 	time.Local = location
 

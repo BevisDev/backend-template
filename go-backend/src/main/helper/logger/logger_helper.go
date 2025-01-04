@@ -17,35 +17,44 @@ import (
 )
 
 var (
-	once   sync.Once
-	logger *zap.Logger
+	once      sync.Once
+	appLogger *zap.Logger
+	rrLogger  *zap.Logger
+	extLogger *zap.Logger
 )
 
-type RequestLogger struct {
-	State  string
-	URL    string
-	Query  string
-	Method string
-	Header any
-	Body   any
-}
+const appFilename = "app.log"
+const rrFilename = "req_res.log"
+const extFilename = "ext.log"
 
-type ResponseLogger struct {
-	State       string
-	DurationSec time.Duration
-	Status      int
-	Header      any
-	Body        any
-}
-
-func initLogger() {
+func newLogger(kind string) *zap.Logger {
 	once.Do(func() {
 		encoder := getEncoderLog()
-		writeSync := writeSync()
-		core := zapcore.NewCore(encoder, writeSync, zapcore.InfoLevel)
-		newLogger := zap.New(core, zap.AddCaller())
-		logger = newLogger
+		// new appLogger
+		appWrite := writeSync(appFilename)
+		appCore := zapcore.NewCore(encoder, appWrite, zapcore.InfoLevel)
+		appLogger = zap.New(appCore, zap.AddCaller())
+
+		// new rrLogger
+		rrWrite := writeSync(rrFilename)
+		rrCore := zapcore.NewCore(encoder, rrWrite, zapcore.InfoLevel)
+		rrLogger = zap.New(rrCore, zap.AddCaller())
+
+		// new extLogger
+		extWrite := writeSync(extFilename)
+		extCore := zapcore.NewCore(encoder, extWrite, zapcore.InfoLevel)
+		extLogger = zap.New(extCore, zap.AddCaller())
 	})
+	switch kind {
+	case appFilename:
+		return appLogger
+	case rrFilename:
+		return rrLogger
+	case extFilename:
+		return extLogger
+	default:
+		return appLogger
+	}
 }
 
 func getEncoderLog() zapcore.Encoder {
@@ -84,7 +93,7 @@ func getEncoderLog() zapcore.Encoder {
 	return zapcore.NewJSONEncoder(encodeConfig)
 }
 
-func writeSync() zapcore.WriteSyncer {
+func writeSync(kind string) zapcore.WriteSyncer {
 	appConfig := config.AppConfig
 
 	// handle profile dev
@@ -93,8 +102,8 @@ func writeSync() zapcore.WriteSyncer {
 	}
 
 	loggerConfig := appConfig.LoggerConfig
-	logger := lumberjack.Logger{
-		Filename:   getFilename(loggerConfig.LogDir),
+	lumberLogger := lumberjack.Logger{
+		Filename:   getFilename(kind),
 		MaxSize:    loggerConfig.MaxSize,
 		MaxBackups: loggerConfig.MaxBackups,
 		MaxAge:     loggerConfig.MaxAge,
@@ -105,21 +114,36 @@ func writeSync() zapcore.WriteSyncer {
 	if loggerConfig.IsSplit {
 		c := cron.New()
 		c.AddFunc(loggerConfig.CronTime, func() {
-			logger.Filename = getFilename(loggerConfig.LogDir)
-			logger.Close()
+			lumberLogger.Filename = getFilename(kind)
+			lumberLogger.Close()
 		})
 		c.Start()
 	}
 
-	return zapcore.AddSync(&logger)
+	return zapcore.AddSync(&lumberLogger)
 }
 
-func getFilename(folder string) string {
+func getFilename(kind string) string {
 	now := time.Now().Format(consts.YYYY_MM_DD)
-	return filepath.Join(folder, now, "app.log")
+	loggerConfig := config.AppConfig.LoggerConfig
+	switch kind {
+	case appFilename:
+		return filepath.Join(loggerConfig.LogAppDir, now, appFilename)
+	case rrFilename:
+		return filepath.Join(loggerConfig.LogRRDir, now, rrFilename)
+	case extFilename:
+		return filepath.Join(loggerConfig.LogExtDir, now, extFilename)
+	default:
+		return filepath.Join(loggerConfig.LogAppDir, now, appFilename)
+	}
 }
 
 func log(level zapcore.Level, state string, msg string, args ...interface{}) {
+	// new instance
+	if appLogger == nil {
+		newLogger(appFilename)
+	}
+
 	// check state
 	if utils.IsNilOrEmpty(state) {
 		state = utils.GenUUID()
@@ -134,19 +158,21 @@ func log(level zapcore.Level, state string, msg string, args ...interface{}) {
 	}
 
 	// skip caller before
-	logging := logger.WithOptions(zap.AddCallerSkip(2))
+	logging := appLogger.WithOptions(zap.AddCallerSkip(2))
 
 	switch level {
 	case zapcore.InfoLevel:
 		logging.Info(message, zap.String("state", state))
+		break
 	case zapcore.WarnLevel:
 		logging.Warn(message, zap.String("state", state))
+		break
 	case zapcore.ErrorLevel:
 		logging.Error(message, zap.String("state", state))
+		break
 	case zapcore.PanicLevel:
 		logging.Panic(message, zap.String("state", state))
-	default:
-		logging.Info(message, zap.String("state", state))
+		break
 	}
 }
 
@@ -161,64 +187,25 @@ func formatMessage(msg string, args ...interface{}) string {
 }
 
 func Sync(state string) {
-	if logger != nil {
-		if err := logger.Sync(); err != nil {
+	if appLogger != nil {
+		if err := appLogger.Sync(); err != nil {
 			Error(state, "Error syncing logger: {}", err)
 		}
 	}
 }
 
-func RequestInfo(req *RequestLogger) {
-	if logger == nil {
-		initLogger()
-	}
-	logger.WithOptions(zap.AddCallerSkip(1)).Info("REQUEST INFO",
-		zap.String("state", req.State),
-		zap.String("url", req.URL),
-		zap.String("method", req.Method),
-		zap.String("query", req.Query),
-		zap.Any("header", req.Header),
-		zap.Any("body", req.Body),
-	)
-}
-
-func ResponseInfo(resp *ResponseLogger) {
-	if logger == nil {
-		initLogger()
-	}
-	logger.WithOptions(zap.AddCallerSkip(1)).Info("RESPONSE INFO",
-		zap.String("state", resp.State),
-		zap.Int("status", resp.Status),
-		zap.Float64("durationSec", resp.DurationSec.Seconds()),
-		zap.Any("header", resp.Header),
-		zap.Any("body", resp.Body),
-	)
-}
-
 func Info(state string, msg string, args ...interface{}) {
-	if logger == nil {
-		initLogger()
-	}
 	log(zapcore.InfoLevel, state, msg, args...)
 }
 
 func Error(state string, msg string, args ...interface{}) {
-	if logger == nil {
-		initLogger()
-	}
 	log(zapcore.ErrorLevel, state, msg, args...)
 }
 
 func Warn(state string, msg string, args ...interface{}) {
-	if logger == nil {
-		initLogger()
-	}
 	log(zapcore.WarnLevel, state, msg, args...)
 }
 
 func Panic(state string, msg string, args ...interface{}) {
-	if logger == nil {
-		initLogger()
-	}
 	log(zapcore.PanicLevel, state, msg, args...)
 }

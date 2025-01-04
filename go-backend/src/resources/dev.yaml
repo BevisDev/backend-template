@@ -28,7 +28,9 @@ databases:
 logger:
   isSplit: false
   cronTime: 0 0 * * *
-  logDir: ./logs
+  logAppDir: ./logs/app
+  logRRDir: ./logs/req_res
+  logExtDir: ./logs/ext
   maxSize: 5
   maxBackup: 3
   maxAge: 28
