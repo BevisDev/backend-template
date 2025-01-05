@@ -10,7 +10,7 @@ type oracleDB struct {
 }
 
 func NewOracleDB(port int, host, username, password, database string) DB {
-	db, _ := InitDB(port, consts.Oracle, host, username, password, database)
+	db, _ := NewDB(port, consts.Oracle, host, username, password, database)
 	return &oracleDB{db: db}
 }
 

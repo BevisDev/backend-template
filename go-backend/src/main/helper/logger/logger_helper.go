@@ -173,12 +173,14 @@ func log(level zapcore.Level, state string, msg string, args ...interface{}) {
 	case zapcore.PanicLevel:
 		logging.Panic(message, zap.String("state", state))
 		break
+	default:
+		logging.Info(message, zap.String("state", state))
 	}
 }
 
 func formatMessage(msg string, args ...interface{}) string {
 	var message string
-	if !strings.Contains(msg, "%") {
+	if !strings.Contains(msg, "%") && strings.Contains(msg, "{}") {
 		message = strings.ReplaceAll(msg, "{}", "%+v")
 	} else {
 		message = msg

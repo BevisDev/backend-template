@@ -10,14 +10,21 @@ server:
   serverTimeout: 30
 
 databases:
-  mysql:
+  - driver: sqlserver
     host: localhost
-    port: 3306
+    port: 1433
     username: admin
     password: secret
     schema:
       - mydatabase
-  postgresql:
+  - driver: postgresql
+    host: localhost
+    port: 5432
+    username: admin111
+    password: secret222
+    schema:
+      - mydatabase333
+  - driver: godror
     host: localhost
     port: 5432
     username: admin111

@@ -10,7 +10,7 @@ type postgresDB struct {
 }
 
 func NewPostgresDB(port int, host, username, password, database string) DB {
-	db, _ := InitDB(port, consts.Postgres, host, username, password, database)
+	db, _ := NewDB(port, consts.Postgres, host, username, password, database)
 	return &postgresDB{db: db}
 }
 

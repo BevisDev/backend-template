@@ -1,7 +1,7 @@
 package consts
 
 const (
-	SQLServer = "sqlserver"
-	Postgres  = "postgres"
-	Oracle    = "godror"
+	SQLServerDriver = "sqlserver"
+	PostgresDriver  = "postgres"
+	OracleDriver    = "godror"
 )

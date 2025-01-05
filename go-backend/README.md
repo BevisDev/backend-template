@@ -169,3 +169,10 @@ c.Start()
 | Month        | Yes        | 1-12 or JAN-DEC | * / , -                    |
 | Day of week  | Yes        | 0-6 or SUN-SAT  | * / , - ?                  |
 
+### Getting interact with database
+
+To use map into struct easily:
+
+```sh
+go get github.com/jmoiron/sqlx
+```

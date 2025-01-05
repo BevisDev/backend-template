@@ -16,10 +16,9 @@ type Config struct {
 	} `mapstructure:"server"`
 
 	// Databases
-	DatabasesConfig struct {
-		MySqlConfig      DatabaseProps `mapstructure:"mysql"`
-		PostgreSqlConfig DatabaseProps `mapstructure:"postgresql"`
-	} `mapstructure:"databases"`
+	DBConfig struct {
+		Databases []Database `mapstructure:"databases"`
+	}
 
 	// Logger
 	LoggerConfig struct {
@@ -35,7 +34,8 @@ type Config struct {
 	} `mapstructure:"logger"`
 }
 
-type DatabaseProps struct {
+type Database struct {
+	Driver   string   `mapstructure:"driver"`
 	Host     string   `mapstructure:"host"`
 	Port     int      `mapstructure:"port"`
 	Username string   `mapstructure:"username"`
