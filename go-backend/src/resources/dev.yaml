@@ -15,6 +15,9 @@ databases:
     port: 1433
     username: admin
     password: secret
+    maxOpenConns: 100
+    maxIdleConns: 10
+    connMaxLifeTime: 3600
     schema:
       - mydatabase
   - driver: postgresql
@@ -22,6 +25,9 @@ databases:
     port: 5432
     username: admin111
     password: secret222
+    maxOpenConns: 100
+    maxIdleConns: 10
+    connMaxLifeTime: 3600
     schema:
       - mydatabase333
   - driver: godror
@@ -29,6 +35,9 @@ databases:
     port: 5432
     username: admin111
     password: secret222
+    maxOpenConns: 100
+    maxIdleConns: 10
+    connMaxLifeTime: 3600
     schema:
       - mydatabase333
 

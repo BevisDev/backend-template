@@ -17,6 +17,11 @@
 ### SQL Driver
 
 - [SQL Server](https://github.com/denisenkom/go-mssqldb)
+
+```sh
+go get github.com/denisenkom/go-mssqldb
+```
+
 - [PostgreSQL](https://github.com/lib/pq)
 - [Oracle](https://github.com/godror/godror)
 - [Other Driver](https://go.dev/wiki/SQLDrivers)
@@ -24,6 +29,7 @@
 ### Utilities:
 
 - [UUID](https://github.com/google/uuid)
+- [Wire](https://github.com/google/wire)
 
 ## Technology stack
 
@@ -175,4 +181,10 @@ To use map into struct easily:
 
 ```sh
 go get github.com/jmoiron/sqlx
+```
+
+### Getting DI
+
+```sh
+go get github.com/google/wire/cmd/wire
 ```

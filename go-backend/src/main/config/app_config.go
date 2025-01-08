@@ -16,9 +16,7 @@ type Config struct {
 	} `mapstructure:"server"`
 
 	// Databases
-	DBConfig struct {
-		Databases []Database `mapstructure:"databases"`
-	}
+	Databases []Database `mapstructure:"databases"`
 
 	// Logger
 	LoggerConfig struct {
@@ -35,10 +33,14 @@ type Config struct {
 }
 
 type Database struct {
-	Driver   string   `mapstructure:"driver"`
-	Host     string   `mapstructure:"host"`
-	Port     int      `mapstructure:"port"`
-	Username string   `mapstructure:"username"`
-	Password string   `mapstructure:"password"`
-	Schema   []string `mapstructure:"schema"`
+	Driver          string   `mapstructure:"driver"`
+	Host            string   `mapstructure:"host"`
+	Port            int      `mapstructure:"port"`
+	Username        string   `mapstructure:"username"`
+	Password        string   `mapstructure:"password"`
+	TimeoutSec      int      `mapstructure:"timeoutSec"`
+	MaxOpenConns    int      `mapstructure:"maxOpenConns"`
+	MaxIdleConns    int      `mapstructure:"maxIdleConns"`
+	ConnMaxLifeTime int      `mapstructure:"connMaxLifeTime"`
+	Schema          []string `mapstructure:"schema"`
 }

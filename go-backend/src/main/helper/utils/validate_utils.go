@@ -1,15 +1,17 @@
 package utils
 
 import (
+	"context"
+	"errors"
 	"reflect"
 	"strings"
 )
 
-func IsNilOrEmpty(value interface{}) bool {
-	if value == nil {
+func IsNilOrEmpty(inp interface{}) bool {
+	if inp == nil {
 		return true
 	}
-	v := reflect.ValueOf(value)
+	v := reflect.ValueOf(inp)
 	switch v.Kind() {
 	case reflect.Invalid:
 		return true
@@ -26,4 +28,12 @@ func IsNilOrEmpty(value interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func IsPtr(inp interface{}) bool {
+	return reflect.ValueOf(inp).Kind() == reflect.Ptr
+}
+
+func IsTimedOut(err error) bool {
+	return errors.Is(err, context.DeadlineExceeded)
 }

@@ -44,7 +44,7 @@ func LoggerHandler() gin.HandlerFunc {
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBytes))
 		}
 
-		logger.RequestInfo(&logger.RequestLogger{
+		logger.RequestLogger(&logger.Request{
 			State:  state,
 			URL:    c.Request.URL.String(),
 			Query:  c.Request.URL.RawQuery,
@@ -74,7 +74,7 @@ func LoggerHandler() gin.HandlerFunc {
 			respBody = writer.body.String()
 		}
 
-		logger.ResponseInfo(&logger.ResponseLogger{
+		logger.ResponseLogger(&logger.Response{
 			State:       state,
 			Status:      c.Writer.Status(),
 			DurationSec: duration,
