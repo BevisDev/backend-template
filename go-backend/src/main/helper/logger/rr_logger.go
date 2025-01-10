@@ -19,6 +19,7 @@ type rrLogger struct {
 type Request struct {
 	State  string
 	URL    string
+	Time   time.Time
 	Query  string
 	Method string
 	Header any
@@ -56,9 +57,11 @@ func (r *rrLogger) Sync(state string) {
 
 func (r *rrLogger) RequestLogger(req *Request) {
 	r.rrLogger.WithOptions(
-		zap.AddCallerSkip(1)).Info("[===== REQUEST INFO =====]",
+		zap.AddCallerSkip(2)).Info(
+		"[===== REQUEST INFO =====]",
 		zap.String("state", req.State),
 		zap.String("url", req.URL),
+		zap.Time("time", req.Time),
 		zap.String("method", req.Method),
 		zap.String("query", req.Query),
 		zap.Any("header", req.Header),
@@ -68,7 +71,8 @@ func (r *rrLogger) RequestLogger(req *Request) {
 
 func (r *rrLogger) ResponseLogger(resp *Response) {
 	r.rrLogger.WithOptions(
-		zap.AddCallerSkip(1)).Info("[===== RESPONSE INFO =====]",
+		zap.AddCallerSkip(2)).Info(
+		"[===== RESPONSE INFO =====]",
 		zap.String("state", resp.State),
 		zap.Int("status", resp.Status),
 		zap.Float64("durationSec", resp.DurationSec.Seconds()),

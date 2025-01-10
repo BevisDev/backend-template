@@ -2,36 +2,39 @@
 
 ## Getting started
 
-### Prerequisites
+***Prerequisites***
 
 - [Go 1.23.4](https://go.dev/doc/install) or higher
 
-### Dependencies
-
-- [Gin Gonic](https://github.com/gin-gonic/gin)
-- [Viper](https://github.com/spf13/viper)
-- [Zap](https://github.com/uber-go/zap)
-- [Lumberjack](https://github.com/natefinch/lumberjack)
-- [Cron](https://github.com/robfig/cron)
-
-### SQL Driver
-
-- [SQL Server](https://github.com/denisenkom/go-mssqldb)
+then create folder project
 
 ```sh
-go get github.com/denisenkom/go-mssqldb
+mkdir go-backend
+cd go-backend
 ```
 
-- [PostgreSQL](https://github.com/lib/pq)
-- [Oracle](https://github.com/godror/godror)
-- [Other Driver](https://go.dev/wiki/SQLDrivers)
+using Go module
 
-### Utilities:
+```sh
+go mod init github.com/BevisDev/go-backend
+```
+
+using dependencies
+
+- [Framework](#getting-framework)
+- [Handle Configuration](#getting-viper)
+- [Handle Logger](#getting-logger)
+- [Handle Write log to rolling files](#getting-write-logs-to-rolling-files)
+- [Handle Cron](#getting-cron)
+- [Handle Databases](#getting-databases)
+- [Handle Redis](#getting-redis)
+
+Utilities
 
 - [UUID](https://github.com/google/uuid)
 - [Wire](https://github.com/google/wire)
 
-## Technology stack
+### Technology stack
 
 > **Note:**
 >
@@ -74,22 +77,9 @@ sudo apt update
 sudo apt install make
 ```
 
-### Init Go Module
-
-Create folder project
-
-```sh
-mkdir go-backend
-cd go-backend
-```
-
-Init Go module
-
-```sh
-go mod init github.com/BevisDev/go-backend
-```
-
 ### Getting Framework
+
+Using [Gin Gonic](https://github.com/gin-gonic/gin)
 
 ```sh
 go get -u github.com/gin-gonic/gin
@@ -125,27 +115,33 @@ go run main.go
 
 Then visit [`0.0.0.0:8080/ping`](http://0.0.0.0:8080/ping) in your browser to see the response!
 
-## Getting Viper
+### Getting Viper
+
+Document: [Viper](https://github.com/spf13/viper)
 
 ```sh
 go get github.com/spf13/viper
 ```
 
-## Getting handler Logger
+### Getting logger
+
+Document: [Zap](https://github.com/uber-go/zap)
 
 ```sh
 go get -u go.uber.org/zap
 ```
 
-For writting logs to rolling files
+### Getting write logs to rolling files
+
+Document: [Lumberjack](https://github.com/natefinch/lumberjack)
 
 ```sh
 go get github.com/natefinch/lumberjack
 ```
 
-## Getting Cron
+### Getting Cron
 
-To schedule job runner
+Document: [Cron](https://github.com/robfig/cron)
 
 ```sh
 go get github.com/robfig/cron/v3@v3.0.0
@@ -155,7 +151,7 @@ go get github.com/robfig/cron/v3@v3.0.0
 
 A cron expression represents a set of times, using 6 space-separated fields.
 
-### Example:
+#### Example:
 
 ```go
 c := cron.New(cron.WithSeconds())
@@ -175,7 +171,25 @@ c.Start()
 | Month        | Yes        | 1-12 or JAN-DEC | * / , -                    |
 | Day of week  | Yes        | 0-6 or SUN-SAT  | * / , - ?                  |
 
-### Getting interact with database
+### Getting DI
+
+```sh
+go get github.com/google/wire/cmd/wire
+```
+
+### Getting Databases
+
+***Install Driver***
+
+- [SQL Server](https://github.com/denisenkom/go-mssqldb)
+
+```sh
+go get github.com/denisenkom/go-mssqldb
+```
+
+- [PostgreSQL](https://github.com/lib/pq)
+- [Oracle](https://github.com/godror/godror)
+- [Other Driver](https://go.dev/wiki/SQLDrivers)
 
 To use map into struct easily:
 
@@ -183,8 +197,10 @@ To use map into struct easily:
 go get github.com/jmoiron/sqlx
 ```
 
-### Getting DI
+### Getting Redis
+
+Document: [Redis](https://github.com/redis/go-redis)
 
 ```sh
-go get github.com/google/wire/cmd/wire
+go get github.com/redis/go-redis/v9
 ```

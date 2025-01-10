@@ -4,12 +4,11 @@ import (
 	"github.com/BevisDev/backend-template/src/main/api/v1"
 	"github.com/BevisDev/backend-template/src/main/config"
 	"github.com/BevisDev/backend-template/src/main/middleware"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func InitRouter() *gin.Engine {
+func startRouter() *gin.Engine {
 	var r *gin.Engine
 	serverConfig := config.AppConfig.ServerConfig
 
@@ -31,8 +30,9 @@ func InitRouter() *gin.Engine {
 	})
 
 	// use Middlewares
-	r.Use(middleware.AuthHandler())
 	r.Use(middleware.LoggerHandler())
+	r.Use(middleware.AuthHandler())
+	r.Use(middleware.ErrorHandler())
 
 	api := r.Group("/api")
 	{

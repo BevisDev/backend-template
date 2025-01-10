@@ -47,6 +47,7 @@ func LoggerHandler() gin.HandlerFunc {
 		logger.RequestLogger(&logger.Request{
 			State:  state,
 			URL:    c.Request.URL.String(),
+			Time:   startTime,
 			Query:  c.Request.URL.RawQuery,
 			Method: c.Request.Method,
 			Header: c.Request.Header,

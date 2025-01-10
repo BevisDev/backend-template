@@ -30,8 +30,9 @@ func IsNilOrEmpty(inp interface{}) bool {
 	}
 }
 
-func IsPtr(inp interface{}) bool {
-	return reflect.ValueOf(inp).Kind() == reflect.Ptr
+func IsPtrOrStruct(inp interface{}) bool {
+	return reflect.ValueOf(inp).Kind() == reflect.Ptr ||
+		reflect.ValueOf(inp).Kind() == reflect.Struct
 }
 
 func IsTimedOut(err error) bool {

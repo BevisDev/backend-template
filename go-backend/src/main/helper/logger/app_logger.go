@@ -52,8 +52,8 @@ func (c *appLogger) Warn(state, msg string, args ...interface{}) {
 	c.log(zapcore.WarnLevel, state, msg, args...)
 }
 
-func (c *appLogger) Panic(state, msg string, args ...interface{}) {
-	c.log(zapcore.PanicLevel, state, msg, args...)
+func (c *appLogger) Fatal(state, msg string, args ...interface{}) {
+	c.log(zapcore.FatalLevel, state, msg, args...)
 }
 
 func (c *appLogger) log(level zapcore.Level, state string, msg string, args ...interface{}) {
@@ -75,7 +75,7 @@ func (c *appLogger) log(level zapcore.Level, state string, msg string, args ...i
 	}
 
 	// skip caller before
-	logging := c.appLogger.WithOptions(zap.AddCallerSkip(2))
+	logging := c.appLogger.WithOptions(zap.AddCallerSkip(3))
 	switch level {
 	case zapcore.InfoLevel:
 		logging.Info(message, zap.String("state", state))
@@ -86,8 +86,8 @@ func (c *appLogger) log(level zapcore.Level, state string, msg string, args ...i
 	case zapcore.ErrorLevel:
 		logging.Error(message, zap.String("state", state))
 		break
-	case zapcore.PanicLevel:
-		logging.Panic(message, zap.String("state", state))
+	case zapcore.FatalLevel:
+		logging.Fatal(message, zap.String("state", state))
 		break
 	default:
 		logging.Info(message, zap.String("state", state))

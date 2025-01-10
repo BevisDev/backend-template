@@ -12,8 +12,8 @@ func Warn(state, msg string, args ...interface{}) {
 	NewAppLogger().Warn(state, msg, args...)
 }
 
-func Panic(state string, msg string, args ...interface{}) {
-	NewAppLogger().Panic(state, msg, args...)
+func Fatal(state string, msg string, args ...interface{}) {
+	NewAppLogger().Fatal(state, msg, args...)
 }
 
 func RequestLogger(req *Request) {

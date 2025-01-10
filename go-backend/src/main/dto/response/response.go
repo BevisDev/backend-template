@@ -2,7 +2,7 @@ package response
 
 import (
 	"github.com/BevisDev/backend-template/src/main/consts"
-	"github.com/BevisDev/backend-template/src/main/helper/utils"
+	"github.com/BevisDev/backend-template/src/main/helper/datetime"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -10,12 +10,11 @@ import (
 
 type Data struct {
 	State      string      `json:"State,omitempty"`
-	RequestAt  *time.Time  `json:"request_at,omitempty"`
 	IsSuccess  bool        `json:"is_success"`
 	Data       interface{} `json:"data,omitempty"`
 	Code       int         `json:"code,omitempty"`
 	Message    string      `json:"message,omitempty"`
-	ResponseAt time.Time   `json:"response_at,omitempty"`
+	ResponseAt string      `json:"response_at,omitempty"`
 	Error      *Error      `json:"error,omitempty"`
 }
 
@@ -30,18 +29,27 @@ func OK(c *gin.Context, data interface{}, code int) {
 		Data:       data,
 		Code:       code,
 		Message:    consts.Message[code],
-		ResponseAt: time.Now(),
+		ResponseAt: datetime.ToString(time.Now(), consts.DATETIME_NO_TZ),
 	})
 }
 
-func ErrorResponse(c *gin.Context, httpCode int, code int, message string) {
-	if utils.IsNilOrEmpty(message) {
-		message = consts.Message[code]
-	}
+func ErrorResponse(c *gin.Context, httpCode, code int) {
+	message := consts.Message[code]
 
 	c.JSON(httpCode, Data{
 		IsSuccess:  false,
-		ResponseAt: time.Now(),
+		ResponseAt: datetime.ToString(time.Now(), consts.DATETIME_NO_TZ),
+		Error: &Error{
+			ErrorCode: code,
+			Message:   message,
+		},
+	})
+}
+
+func ErrorResponse2(c *gin.Context, httpCode, code int, message string) {
+	c.JSON(httpCode, Data{
+		IsSuccess:  false,
+		ResponseAt: datetime.ToString(time.Now(), consts.DATETIME_NO_TZ),
 		Error: &Error{
 			ErrorCode: code,
 			Message:   message,

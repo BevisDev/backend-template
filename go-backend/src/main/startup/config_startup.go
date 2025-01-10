@@ -2,13 +2,12 @@ package startup
 
 import (
 	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/spf13/viper"
 	"log"
 	"os"
-
-	"github.com/spf13/viper"
 )
 
-func LoadConfig() {
+func loadConfig() {
 	profile := os.Getenv("GO_PROFILE")
 	if profile == "" {
 		profile = "dev" // set default

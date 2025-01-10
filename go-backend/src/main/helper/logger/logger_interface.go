@@ -6,7 +6,7 @@ type (
 		Info(state, msg string, args ...interface{})
 		Error(state, msg string, args ...interface{})
 		Warn(state, msg string, args ...interface{})
-		Panic(state, msg string, args ...interface{})
+		Fatal(state, msg string, args ...interface{})
 	}
 
 	IRrLogger interface {

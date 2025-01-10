@@ -15,9 +15,6 @@ type Config struct {
 		ServerTimeout  int      `mapstructure:"serverTimeout"`
 	} `mapstructure:"server"`
 
-	// Databases
-	Databases []Database `mapstructure:"databases"`
-
 	// Logger
 	LoggerConfig struct {
 		IsSplit    bool   `mapstructure:"isSplit"`
@@ -30,6 +27,17 @@ type Config struct {
 		MaxAge     int    `mapstructure:"maxAge"`
 		Compress   bool   `mapstructure:"compress"`
 	} `mapstructure:"logger"`
+
+	// Databases
+	Databases []Database `mapstructure:"databases"`
+
+	// Redis
+	RedisConfig struct {
+		Host     string `mapstructure:"host"`
+		Port     int    `mapstructure:"port"`
+		Password string `mapstructure:"password"`
+		Index    int    `mapstructure:"index"`
+	} `mapstructure:"redis"`
 }
 
 type Database struct {

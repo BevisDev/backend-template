@@ -5,7 +5,9 @@ import (
 	"github.com/BevisDev/backend-template/src/main/config"
 	"github.com/BevisDev/backend-template/src/main/consts"
 	"github.com/BevisDev/backend-template/src/main/helper/logger"
-	_ "github.com/denisenkom/go-mssqldb"
+	"github.com/BevisDev/backend-template/src/main/helper/utils"
+
+	//_ "github.com/denisenkom/go-mssqldb"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -14,18 +16,22 @@ var (
 	ConfigDb    map[string]config.Database
 )
 
-func InitConnections(state string) {
+func NewDb(state string) {
+	databases := config.AppConfig.Databases
+	if utils.IsNilOrEmpty(databases) {
+		logger.Fatal(state, "Error Config DB is not initialized")
+		return
+	}
 	Connections = make(map[string]*sqlx.DB)
 	ConfigDb = make(map[string]config.Database)
-	databases := config.AppConfig.Databases
 	for _, db := range databases {
 		for _, schema := range db.Schema {
-			NewDb(db, schema, state)
+			newConnection(db, schema, state)
 		}
 	}
 }
 
-func NewDb(cf config.Database, schema, state string) {
+func newConnection(cf config.Database, schema, state string) {
 	var connStr string
 	var db *sqlx.DB
 	var err error
@@ -37,7 +43,7 @@ func NewDb(cf config.Database, schema, state string) {
 			cf.Host, cf.Port, cf.Username, cf.Password, schema)
 		db, err = sqlx.Connect(consts.SQLServerDriver, connStr)
 		if err != nil {
-			logger.Panic(state, "Error open connection to SQLServer: {}", err)
+			logger.Fatal(state, "Error open connection to SQLServer: {}", err)
 			return
 		}
 		break
@@ -46,7 +52,7 @@ func NewDb(cf config.Database, schema, state string) {
 			cf.Host, cf.Port, cf.Username, cf.Password, schema)
 		db, err = sqlx.Connect(cf.Driver, connStr)
 		if err != nil {
-			logger.Panic(state, "Error open connection to Postgres: {}", err)
+			logger.Fatal(state, "Error open connection to Postgres: {}", err)
 			return
 		}
 		break
@@ -55,20 +61,20 @@ func NewDb(cf config.Database, schema, state string) {
 			cf.Username, cf.Password, cf.Host, cf.Port, schema)
 		db, err = sqlx.Connect(cf.Driver, connStr)
 		if err != nil {
-			logger.Panic(state, "Error open connection to Oracle: {}", err)
+			logger.Fatal(state, "Error open connection to Oracle: {}", err)
 			return
 		}
 		break
 	}
 
 	if db == nil {
-		logger.Panic(state, "Error db is nil")
+		logger.Fatal(state, "Error db is nil")
 		return
 	}
 
 	// ping check connection
 	if err = db.Ping(); err != nil {
-		logger.Panic("", "Error connect to database: {}", err)
+		logger.Fatal("", "Error connect to database: {}", err)
 		return
 	}
 

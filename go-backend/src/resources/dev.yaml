@@ -9,38 +9,6 @@ server:
   clientTimeout: 30
   serverTimeout: 30
 
-databases:
-  - driver: sqlserver
-    host: localhost
-    port: 1433
-    username: admin
-    password: secret
-    maxOpenConns: 100
-    maxIdleConns: 10
-    connMaxLifeTime: 3600
-    schema:
-      - mydatabase
-  - driver: postgresql
-    host: localhost
-    port: 5432
-    username: admin111
-    password: secret222
-    maxOpenConns: 100
-    maxIdleConns: 10
-    connMaxLifeTime: 3600
-    schema:
-      - mydatabase333
-  - driver: godror
-    host: localhost
-    port: 5432
-    username: admin111
-    password: secret222
-    maxOpenConns: 100
-    maxIdleConns: 10
-    connMaxLifeTime: 3600
-    schema:
-      - mydatabase333
-
 logger:
   isSplit: false
   cronTime: 0 0 * * *
@@ -51,3 +19,44 @@ logger:
   maxBackup: 3
   maxAge: 28
   compress: true
+
+databases:
+  - driver: sqlserver
+    host: localhost
+    port: 1433
+    username: sa
+    password: admin
+    timeoutSec: 10
+    maxOpenConns: 100
+    maxIdleConns: 10
+    connMaxLifeTime: 3600
+    schema:
+      - user
+  - driver: godror
+    host: localhost
+    port: 5432
+    username: sa
+    password: mypassword
+    timeoutSec: 10
+    maxOpenConns: 100
+    maxIdleConns: 10
+    connMaxLifeTime: 3600
+    schema:
+      - oracle
+  - driver: postgres
+    host: localhost
+    port: 5432
+    username: admin111
+    password: secret222
+    timeoutSec: 10
+    maxOpenConns: 100
+    maxIdleConns: 10
+    connMaxLifeTime: 3600
+    schema:
+      - mydatabase333
+
+redis:
+  host: localhost
+  port: 6379
+  password: mypassword
+  index: 1
