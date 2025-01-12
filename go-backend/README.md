@@ -64,7 +64,8 @@ Open PowerShell with **Administrator privileges** and run the following command:
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 ```
 
-After Chocolatey is installed, you can install `make` by running the following command in the PowerShell or Command Prompt:
+After Chocolatey is installed, you can install `make` by running the following command in the PowerShell or Command
+Prompt:
 
 ```sh
 choco install make
@@ -91,19 +92,19 @@ go get -u github.com/gin-gonic/gin
 package main
 
 import (
-  "net/http"
+	"net/http"
 
-  "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-  r := gin.Default()
-  r.GET("/ping", func(c *gin.Context) {
-    c.JSON(http.StatusOK, gin.H{
-      "message": "pong",
-    })
-  })
-  r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 ```
 
@@ -156,8 +157,8 @@ A cron expression represents a set of times, using 6 space-separated fields.
 ```go
 c := cron.New(cron.WithSeconds())
 // second minute hour day month weekday
-c.AddFunc("0 * * * * *", func() { 
-    fmt.Println("Running every minute at the 0th second!") 
+c.AddFunc("0 * * * * *", func () {
+fmt.Println("Running every minute at the 0th second!")
 })
 c.Start()
 ```
@@ -203,4 +204,18 @@ Document: [Redis](https://github.com/redis/go-redis)
 
 ```sh
 go get github.com/redis/go-redis/v9
+```
+
+### Getting Swagger
+
+Document: [Swagger](https://github.com/swaggo/swag)
+
+```sh
+go get -u github.com/swaggo/swag/cmd/swag
+go get -u github.com/swaggo/gin-swagger
+go get -u github.com/swaggo/files
+```
+
+```sh
+swag init --generalInfo ./src/main/startup/run.go --output ./src/resources/swagger
 ```

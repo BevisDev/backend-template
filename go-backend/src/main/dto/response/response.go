@@ -33,7 +33,7 @@ func OK(c *gin.Context, data interface{}, code int) {
 	})
 }
 
-func ErrorResponse(c *gin.Context, httpCode, code int) {
+func SetError(c *gin.Context, httpCode, code int) {
 	message := consts.Message[code]
 
 	c.JSON(httpCode, Data{
@@ -46,7 +46,7 @@ func ErrorResponse(c *gin.Context, httpCode, code int) {
 	})
 }
 
-func ErrorResponse2(c *gin.Context, httpCode, code int, message string) {
+func SetErrorMsg(c *gin.Context, httpCode, code int, message string) {
 	c.JSON(httpCode, Data{
 		IsSuccess:  false,
 		ResponseAt: datetime.ToString(time.Now(), consts.DATETIME_NO_TZ),

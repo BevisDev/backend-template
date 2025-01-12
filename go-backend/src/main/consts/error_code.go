@@ -1,22 +1,23 @@
 package consts
 
 const (
-	// ServerError server error
-	ServerError        = 5000
-	ServerTimeout      = 5001
-	ServerDown         = 5002
-	ServiceUnavailable = 5003
+	// ServerError server error from 1000 to 1999
+	ServerError        = 1000
+	ServerTimeout      = 1001
+	ServerDown         = 1002
+	ServiceUnavailable = 1003
 
-	// OK code success
-	OK      = 1000
-	Created = 1001
+	// OK code success from 2000 to 2999
+	OK      = 2000
+	Created = 2001
 
-	// InvalidRequest client error
-	InvalidRequest      = 4000
-	InvalidCredentials  = 4001
-	NotAuthorizedAccess = 4002
-	InvalidAccessToken  = 4003
-	InvalidSignature    = 4004
+	// InvalidRequest client error from 3000 to ...
+	InvalidRequest      = 3000
+	InvalidCredentials  = 3001
+	NotAuthorizedAccess = 3002
+	InvalidAccessToken  = 3003
+	InvalidSignature    = 3004
+	NotFound            = 3005
 )
 
 var Message = map[int]string{
@@ -36,4 +37,5 @@ var Message = map[int]string{
 	NotAuthorizedAccess: "You are not authorized to access this resource",
 	InvalidAccessToken:  "Access token is invalid",
 	InvalidSignature:    "Signature is invalid",
+	NotFound:            "Page Not Found",
 }

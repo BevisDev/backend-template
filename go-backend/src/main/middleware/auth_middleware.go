@@ -13,14 +13,14 @@ func AuthHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken := c.GetHeader("Authorization")
 		if utils.IsNilOrEmpty(accessToken) {
-			response.ErrorResponse(c, http.StatusUnauthorized, consts.InvalidAccessToken)
+			response.SetError(c, http.StatusUnauthorized, consts.InvalidAccessToken)
 			c.Abort()
 			return
 		}
 
 		signature := c.GetHeader("signature")
 		if utils.IsNilOrEmpty(signature) {
-			response.ErrorResponse(c, http.StatusUnauthorized, consts.InvalidSignature)
+			response.SetError(c, http.StatusUnauthorized, consts.InvalidSignature)
 			c.Abort()
 			return
 		}
