@@ -1,30 +1,43 @@
 package logger
 
-func Info(state, msg string, args ...interface{}) {
-	NewAppLogger().Info(state, msg, args...)
+func Init() {
+	getAppLogger()
+	getRrLogger()
 }
 
-func Error(state, msg string, args ...interface{}) {
-	NewAppLogger().Error(state, msg, args...)
+func getAppLogger() IAppLogger {
+	return NewAppLogger()
 }
 
-func Warn(state, msg string, args ...interface{}) {
-	NewAppLogger().Warn(state, msg, args...)
-}
-
-func Fatal(state string, msg string, args ...interface{}) {
-	NewAppLogger().Fatal(state, msg, args...)
-}
-
-func RequestLogger(req *Request) {
-	NewRrLogger().RequestLogger(req)
-}
-
-func ResponseLogger(resp *Response) {
-	NewRrLogger().ResponseLogger(resp)
+func getRrLogger() IRrLogger {
+	return NewRrLogger()
 }
 
 func Sync(state string) {
-	NewAppLogger().Sync(state)
-	NewRrLogger().Sync(state)
+	getAppLogger().Sync(state)
+	getAppLogger().Sync(state)
+}
+
+func Info(state, msg string, args ...interface{}) {
+	getAppLogger().Info(state, msg, args...)
+}
+
+func Error(state, msg string, args ...interface{}) {
+	getAppLogger().Error(state, msg, args...)
+}
+
+func Warn(state, msg string, args ...interface{}) {
+	getAppLogger().Warn(state, msg, args...)
+}
+
+func Fatal(state string, msg string, args ...interface{}) {
+	getAppLogger().Fatal(state, msg, args...)
+}
+
+func RequestLogger(req *Request) {
+	getRrLogger().RequestLogger(req)
+}
+
+func ResponseLogger(resp *Response) {
+	getRrLogger().ResponseLogger(resp)
 }

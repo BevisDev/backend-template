@@ -1,7 +1,5 @@
 package config
 
-var AppConfig Config
-
 type Config struct {
 	// Server
 	ServerConfig struct {
@@ -10,7 +8,6 @@ type Config struct {
 		TrustedProxies []string `mapstructure:"trustedProxies"`
 		Port           string   `mapstructure:"port"`
 		Version        string   `mapstructure:"version"`
-		Timezone       string   `mapstructure:"timezone"`
 		ClientTimeout  int      `mapstructure:"clientTimeout"`
 		ServerTimeout  int      `mapstructure:"serverTimeout"`
 	} `mapstructure:"server"`

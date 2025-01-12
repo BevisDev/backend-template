@@ -38,3 +38,6 @@ Thumbs.db
 /go/pkg/
 /go/bin/
 /go/src/
+
+# Wire gen
+**/wire_gen.go

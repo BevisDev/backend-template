@@ -1,22 +1,23 @@
 # stage 1: build app
-
 FROM golang:1.23.4-alpine AS builder
 
 WORKDIR /build
 
-COPY . .
-
 COPY go.mod go.sum ./
 
-RUN go mod donwload
-
-RUN go build -v -o bevisdev ./
-
-# stage 2: run app
-FROM scratch
+RUN go mod download
 
 COPY . .
 
-COPY --from=builder /build/bevisdev ./
+EXPOSE 8089
 
+RUN go build -v -o gobe ./src/main
 
+## stage 2: run app
+FROM scratch
+
+COPY ./src/resources /src/resources
+
+COPY --from=builder /build/gobe ./
+
+ENTRYPOINT [ "./gobe" ]
