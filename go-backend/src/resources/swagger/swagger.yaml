@@ -1,0 +1,53 @@
+basePath: /api
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8089
+info:
+  contact:
+    email: dev.binhtt@gmail.com
+    name: Truong Thanh Binh
+    url: https://github.com/BevisDev
+  description: There are APIs in project
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://github.com/BevisDev
+  title: API Specification
+  version: "1.0"
+paths:
+  /signin:
+    get:
+      consumes:
+      - application/json
+      description: Returns a greeting message
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Client Error
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - AccessTokenAuth: []
+      summary: Sign In API
+      tags:
+      - greeting
+securityDefinitions:
+  AccessTokenAuth:
+    description: Description for what is this security definition being used
+    in: header
+    name: AccessToken
+    type: apiKey
+swagger: "2.0"

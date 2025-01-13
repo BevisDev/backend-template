@@ -41,6 +41,3 @@ Thumbs.db
 
 # Wire gen
 **/wire_gen.go
-
-# Swag gen
-src/resources/swagger

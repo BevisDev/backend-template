@@ -10,12 +10,12 @@ all: build
 
 # Install and generate swag
 swag_install:
-	@echo "Install swag"
+	@echo "Installing swag..."
 	@go install github.com/swaggo/swag/cmd/swag@latest
 
 swag_gen:
-	@echo "Generate swag"
-	@swag init --generalInfo ./src/main/startup/run.go --output ./src/resources/swagger
+	@echo "Generating swag.."
+	@swag init --generalInfo ./src/main/main.go --output ./src/resources/swagger
 
 # Build the application
 build: 
