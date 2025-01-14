@@ -12,7 +12,7 @@ func ErrorHandler() gin.HandlerFunc {
 		c.Next()
 		if len(c.Errors) != 0 {
 			err := c.Errors.Last().Err
-			response.SetErrorMsg(c, http.StatusInternalServerError, consts.ServerError, err.Error())
+			response.SetErrMsg(c, http.StatusInternalServerError, consts.ServerError, err.Error())
 		}
 	}
 }

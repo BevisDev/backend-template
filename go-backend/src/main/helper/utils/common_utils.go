@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"math"
@@ -8,6 +9,14 @@ import (
 
 func GenUUID() string {
 	return uuid.NewString()
+}
+
+func GetState(ctx context.Context) string {
+	state, ok := ctx.Value("state").(string)
+	if !ok {
+		state = GenUUID()
+	}
+	return state
 }
 
 func Batches[T any](source []T, length int) ([][]T, error) {

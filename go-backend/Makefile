@@ -17,6 +17,15 @@ swag_gen:
 	@echo "Generating swag.."
 	@swag init --generalInfo ./src/main/main.go --output ./src/resources/swagger
 
+# Install Wire
+wire_install:
+	@echo "Installing wire..."
+	@go install github.com/google/wire/cmd/wire@latest
+
+wire_gen:
+	@echo "Generating wire..."
+	@cd src/main/di && wire gen
+
 # Build the application
 build: 
 	@echo "Building the application..."

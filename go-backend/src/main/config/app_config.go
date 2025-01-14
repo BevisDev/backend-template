@@ -34,11 +34,12 @@ type Config struct {
 		Port     int    `mapstructure:"port"`
 		Password string `mapstructure:"password"`
 		Index    int    `mapstructure:"index"`
+		PoolSize int    `mapstructure:"poolSize"`
 	} `mapstructure:"redis"`
 }
 
 type Database struct {
-	Driver          string   `mapstructure:"driver"`
+	Kind            string   `mapstructure:"kind"`
 	Host            string   `mapstructure:"host"`
 	Port            int      `mapstructure:"port"`
 	Username        string   `mapstructure:"username"`

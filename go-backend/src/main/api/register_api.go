@@ -5,6 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func APIs(r *gin.RouterGroup) {
+func RegisterAPIs(r *gin.RouterGroup) {
 	auth.AuthAPI(r)
 }

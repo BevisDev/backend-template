@@ -20,7 +20,7 @@ logger:
   compress: true
 
 databases:
-  - driver: sqlserver
+  - kind: sqlserver
     host: localhost
     port: 1433
     username: sa
@@ -31,7 +31,7 @@ databases:
     connMaxLifeTime: 3600
     schema:
       - user
-  - driver: godror
+  - kind: oracle
     host: localhost
     port: 5432
     username: sa
@@ -42,7 +42,7 @@ databases:
     connMaxLifeTime: 3600
     schema:
       - oracle
-  - driver: postgres
+  - kind: postgres
     host: localhost
     port: 5432
     username: admin111
@@ -59,3 +59,4 @@ redis:
   port: 6379
   password: mypassword
   index: 1
+  poolSize: 10

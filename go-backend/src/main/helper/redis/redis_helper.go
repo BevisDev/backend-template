@@ -1,13 +1,100 @@
 package redis
 
-func Set(state, key string, value interface{}, expiredTimeSec int) bool {
-	return NewRedis(state).Set(state, key, value, expiredTimeSec)
+import (
+	"context"
+	"fmt"
+	"github.com/BevisDev/backend-template/src/main/config"
+	"github.com/BevisDev/backend-template/src/main/helper/json"
+	"github.com/BevisDev/backend-template/src/main/helper/logger"
+	"github.com/BevisDev/backend-template/src/main/helper/utils"
+	"github.com/redis/go-redis/v9"
+	"reflect"
+	"sync"
+	"time"
+)
+
+var (
+	onceRedis   sync.Once
+	redisClient *redis.Client
+)
+
+func InitRedis(state string) *redis.Client {
+	onceRedis.Do(func() {
+		redisClient = newRedis(state)
+	})
+	return redisClient
 }
 
-func Get(state, key string, result interface{}) bool {
-	return NewRedis(state).Get(state, key, result)
+func newRedis(state string) *redis.Client {
+	appConfig := config.AppConfig
+	if utils.IsNilOrEmpty(appConfig) ||
+		utils.IsNilOrEmpty(appConfig.RedisConfig) {
+		logger.Fatal(state, "Error Config Redis is not initialized")
+		return nil
+	}
+	cf := appConfig.RedisConfig
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", cf.Host, cf.Port),
+		Password: cf.Password,
+		DB:       cf.Index,
+		PoolSize: cf.PoolSize,
+	})
+
+	_, err := rdb.Ping(context.Background()).Result()
+	if err != nil {
+		logger.Fatal(state, "Error Redis ping failed {}", err)
+		return nil
+	}
+	logger.Info(state, "Connect Redis successful")
+	return rdb
 }
 
-func Delete(state, key string) bool {
-	return NewRedis(state).Delete(state, key)
+func Close() {
+	if redisClient != nil {
+		redisClient.Close()
+	}
+}
+
+func Set(ctx context.Context, key string, value interface{}, expiredTimeSec int) bool {
+	state := utils.GetState(ctx)
+	var v interface{}
+	if utils.IsPtrOrStruct(value) {
+		v = json.ToJSON(value)
+	} else {
+		v = value
+	}
+	err := redisClient.Set(ctx, key, v, time.Duration(expiredTimeSec)*time.Second).Err()
+	if err != nil {
+		logger.Error(state, "Error Redis set failed {}", err)
+		return false
+	}
+	return true
+}
+
+func Get(ctx context.Context, key string, result interface{}) bool {
+	state := utils.GetState(ctx)
+	val, err := redisClient.Get(ctx, key).Result()
+	if err != nil {
+		logger.Error(state, "Error Redis get failed {}", err)
+		return false
+	}
+	if val == "" {
+		logger.Error(state, "Error get value in Redis with key {} is empty", key)
+		return false
+	}
+	if err = json.FromJSONStr(val, &result); err != nil {
+		logger.Error(state, "Error deserialize JSON with type result {}, err {}", reflect.TypeOf(result), err)
+		return false
+	}
+	return true
+}
+
+func Delete(ctx context.Context, key string) bool {
+	state := utils.GetState(ctx)
+	err := redisClient.Del(ctx, key).Err()
+	if err != nil {
+		logger.Error(state, "Error Redis delete {} failed {}", key, err)
+		return false
+	}
+	return true
 }

@@ -27,12 +27,17 @@ func (w *ResponseWrapper) Write(b []byte) (int, error) {
 func LoggerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		startTime := time.Now()
-		state, ok := c.Request.Context().Value("state").(string)
-		if !ok {
+		state := c.GetHeader("state")
+		if utils.IsNilOrEmpty(state) {
 			state = utils.GenUUID()
-			ctx := context.WithValue(c.Request.Context(), "state", state)
-			c.Request = c.Request.WithContext(ctx)
 		}
+		// write state in header response
+		c.Writer.Header().Set("state", state)
+
+		// store state in context
+		ctx := context.WithValue(c.Request.Context(), "state", state)
+		c.Request = c.Request.WithContext(ctx)
+
 		// ignore log some content-type
 		ignoreBody := isIgnoreBody(c.Request.Header)
 

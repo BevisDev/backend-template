@@ -1,7 +1,13 @@
 package consts
 
+// kind
 const (
-	SQLServerDriver = "sqlserver"
-	PostgresDriver  = "postgres"
-	OracleDriver    = "godror"
+	SQLServer = "sqlserver"
+	Postgres  = "postgres"
+	Oracle    = "oracle"
+)
+
+// schema
+const (
+	RuleEngine = "RuleEngine"
 )

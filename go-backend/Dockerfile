@@ -11,7 +11,9 @@ RUN go mod download
 
 COPY . .
 
-RUN make swag_install && make swag_gen && make build
+RUN make swag_install && make swag_gen \
+    make wire_install && make wire_gen \
+    && make build
 
 ## stage 2: run app
 FROM alpine:3.21.2
