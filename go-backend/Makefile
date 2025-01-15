@@ -17,6 +17,12 @@ swag_gen:
 	@echo "Generating swag.."
 	@swag init --generalInfo ./src/main/main.go --output ./src/resources/swagger
 
+swag_build: swag_install
+	@echo "Remove Dir Swag"
+	@rm -rf $(RESOUCES_DIR)/swagger
+	@echo "Generating swag.."
+	@swag init --generalInfo $(MAIN_DIR)/main.go --output $(RESOUCES_DIR)/swagger
+
 # Install Wire
 wire_install:
 	@echo "Installing wire..."

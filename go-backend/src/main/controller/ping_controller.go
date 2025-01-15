@@ -48,7 +48,7 @@ func (p *PingController) PingDB(c *gin.Context) {
 // @Tags Check Health
 // @Produce  json
 // @Success 200 {object} map[string]interface{} "Successful"
-// @Router /db [get]
+// @Router /redis [get]
 func (p *PingController) PingRedis(c *gin.Context) {
 	c.JSON(http.StatusOK, p.pingService.PingRedis(c))
 }

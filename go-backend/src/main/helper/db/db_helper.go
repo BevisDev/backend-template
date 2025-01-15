@@ -106,7 +106,7 @@ func GetDB(schema string) *sqlx.DB {
 
 func GetDBInfo(schema string) (*sqlx.DB, *config.Database, bool) {
 	if schema == "" {
-		logger.Fatal("", "Error GetList: schema is empty", schema)
+		logger.Error("", "Error GetList: schema is empty", schema)
 		return nil, nil, false
 	}
 	if utils.IsNilOrEmpty(connectionMap[schema]) ||
@@ -116,11 +116,11 @@ func GetDBInfo(schema string) (*sqlx.DB, *config.Database, bool) {
 	return connectionMap[schema], configDbMap[schema], true
 }
 
-func GetList(ctx context.Context, dest interface{}, schema, query string, args map[string]interface{}) bool {
+func GetList(ctx context.Context, dest interface{}, schema, query string, args ...interface{}) bool {
 	state := utils.GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Fatal(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -132,7 +132,7 @@ func GetList(ctx context.Context, dest interface{}, schema, query string, args m
 	if utils.IsNilOrEmpty(args) {
 		err = db.SelectContext(ctx, dest, query)
 	} else {
-		err = db.SelectContext(ctx, dest, query, args)
+		err = db.SelectContext(ctx, dest, query, args...)
 	}
 
 	if err != nil {
@@ -143,11 +143,11 @@ func GetList(ctx context.Context, dest interface{}, schema, query string, args m
 	return true
 }
 
-func GetUsingNamed(ctx context.Context, dest interface{}, schema, query string, args map[string]interface{}) bool {
+func GetUsingNamed(ctx context.Context, dest interface{}, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Fatal(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -173,7 +173,7 @@ func GetUsingArgs(ctx context.Context, dest interface{}, schema, query string, a
 	state := utils.GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Fatal(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -189,17 +189,17 @@ func GetUsingArgs(ctx context.Context, dest interface{}, schema, query string, a
 	}
 
 	if err != nil {
-		logger.Error(state, "Error Get query failed {}", err.Error())
+		logger.Error(state, "Error GetUsingArgs query failed {}", err.Error())
 		return false
 	}
 	return true
 }
 
-func Insert(ctx context.Context, schema, query string, args map[string]interface{}) bool {
+func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Fatal(state, "Error Insert: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error Insert: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -209,7 +209,7 @@ func Insert(ctx context.Context, schema, query string, args map[string]interface
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
-		logger.Error(state, "Error begin trans in Insert method {}", err)
+		logger.Error(state, "Error BeginTxx in Insert method {}", err)
 		return false
 	}
 
@@ -217,6 +217,8 @@ func Insert(ctx context.Context, schema, query string, args map[string]interface
 	defer func() {
 		if err != nil {
 			tx.Rollback()
+		} else {
+			err = tx.Commit()
 		}
 	}()
 
@@ -225,20 +227,14 @@ func Insert(ctx context.Context, schema, query string, args map[string]interface
 		return false
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		logger.Error(state, "Error commit transaction in Insert method {}", err)
-		return false
-	}
-
 	return true
 }
 
-func Update(ctx context.Context, schema, query string, args map[string]interface{}) bool {
+func Update(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Fatal(state, "Error Update: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error Update: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -248,7 +244,7 @@ func Update(ctx context.Context, schema, query string, args map[string]interface
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
-		logger.Error(state, "Error begin trans in Update method {}", err)
+		logger.Error(state, "Error BeginTxx in Update method {}", err)
 		return false
 	}
 
@@ -256,6 +252,8 @@ func Update(ctx context.Context, schema, query string, args map[string]interface
 	defer func() {
 		if err != nil {
 			tx.Rollback()
+		} else {
+			err = tx.Commit()
 		}
 	}()
 
@@ -264,20 +262,14 @@ func Update(ctx context.Context, schema, query string, args map[string]interface
 		return false
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		logger.Error(state, "Error commit transaction in Update method {}", err)
-		return false
-	}
-
 	return true
 }
 
-func Delete(ctx context.Context, schema, query string, args map[string]interface{}) bool {
+func Delete(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Fatal(state, "Error Delete: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error Delete: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -287,7 +279,7 @@ func Delete(ctx context.Context, schema, query string, args map[string]interface
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
-		logger.Error(state, "Error begin trans in Delete method {}", err)
+		logger.Error(state, "Error BeginTxx in Delete method {}", err)
 		return false
 	}
 
@@ -295,17 +287,13 @@ func Delete(ctx context.Context, schema, query string, args map[string]interface
 	defer func() {
 		if err != nil {
 			tx.Rollback()
+		} else {
+			err = tx.Commit()
 		}
 	}()
 
 	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
 		logger.Error(state, "Error Delete: query failed {}", err)
-		return false
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		logger.Error(state, "Error commit transaction in Delete method {}", err)
 		return false
 	}
 

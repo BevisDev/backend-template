@@ -11,7 +11,7 @@ RUN go mod download
 
 COPY . .
 
-RUN make swag_install && make swag_gen \
+RUN make swag_build \
     make wire_install && make wire_gen \
     && make build
 
