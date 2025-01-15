@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"github.com/BevisDev/backend-template/src/main/service"
+	"github.com/BevisDev/backend-template/src/main/service/ping"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type PingController struct {
-	pingService service.IPingService
+	pingService ping.IPingService
 }
 
 func NewPingController(
-	pingService service.IPingService,
+	pingService ping.IPingService,
 ) *PingController {
 	return &PingController{
 		pingService: pingService,

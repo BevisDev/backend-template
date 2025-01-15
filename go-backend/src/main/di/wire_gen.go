@@ -9,14 +9,14 @@ package di
 import (
 	"github.com/BevisDev/backend-template/src/main/controller"
 	"github.com/BevisDev/backend-template/src/main/repository"
-	"github.com/BevisDev/backend-template/src/main/service/impl"
+	"github.com/BevisDev/backend-template/src/main/service/ping"
 )
 
 // Injectors from ping_di.go:
 
 func NewPingDI() *controller.PingController {
 	iPingRepository := repository.NewPingRepository()
-	iPingService := impl.NewPingServiceImpl(iPingRepository)
+	iPingService := ping.NewPingServiceImpl(iPingRepository)
 	pingController := controller.NewPingController(iPingService)
 	return pingController
 }

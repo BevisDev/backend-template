@@ -3,8 +3,7 @@ package middleware
 import (
 	"bytes"
 	"context"
-	"github.com/BevisDev/backend-template/src/main/helper/logger"
-	"github.com/BevisDev/backend-template/src/main/helper/utils"
+	"github.com/BevisDev/backend-template/src/main/helper"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -28,8 +27,8 @@ func LoggerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		startTime := time.Now()
 		state := c.GetHeader("state")
-		if utils.IsNilOrEmpty(state) {
-			state = utils.GenUUID()
+		if helper.IsNilOrEmpty(state) {
+			state = helper.GenUUID()
 		}
 		// write state in header response
 		c.Writer.Header().Set("state", state)
@@ -49,7 +48,7 @@ func LoggerHandler() gin.HandlerFunc {
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBytes))
 		}
 
-		logger.RequestLogger(&logger.Request{
+		helper.LogRequest(&helper.RequestLogger{
 			State:  state,
 			URL:    c.Request.URL.String(),
 			Time:   startTime,
@@ -80,7 +79,7 @@ func LoggerHandler() gin.HandlerFunc {
 			respBody = writer.body.String()
 		}
 
-		logger.ResponseLogger(&logger.Response{
+		helper.LogResponse(&helper.ResponseLogger{
 			State:       state,
 			Status:      c.Writer.Status(),
 			DurationSec: duration,

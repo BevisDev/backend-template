@@ -1,13 +1,10 @@
-package rest
+package helper
 
 import (
 	"bytes"
 	"context"
 	"errors"
 	"github.com/BevisDev/backend-template/src/main/config"
-	"github.com/BevisDev/backend-template/src/main/helper/json"
-	"github.com/BevisDev/backend-template/src/main/helper/logger"
-	"github.com/BevisDev/backend-template/src/main/helper/utils"
 	"io"
 	"net/http"
 	"sync"
@@ -40,9 +37,9 @@ type Response struct {
 
 func InitRestClient(state string) *http.Client {
 	cf := config.AppConfig
-	if utils.IsNilOrEmpty(cf) ||
-		utils.IsNilOrEmpty(cf.ServerConfig) {
-		logger.Fatal(state, "Error appConfig is not initialized")
+	if IsNilOrEmpty(cf) ||
+		IsNilOrEmpty(cf.ServerConfig) {
+		LogFatal(state, "Error appConfig is not initialized")
 		return nil
 	}
 	onceRestClient.Do(func() {
@@ -53,7 +50,7 @@ func InitRestClient(state string) *http.Client {
 }
 
 func addHeaders(r *http.Request, headers map[string]string) {
-	if utils.IsNilOrEmpty(headers) || headers["Content-Type"] == "" {
+	if IsNilOrEmpty(headers) || headers["Content-Type"] == "" {
 		r.Header.Set("Content-Type", "application/json")
 		return
 	}
@@ -64,11 +61,11 @@ func addHeaders(r *http.Request, headers map[string]string) {
 }
 
 func POST(ctx context.Context, req *Request) *Response {
-	state := utils.GetState(ctx)
+	state := GetState(ctx)
 	var body []byte
 	// serialize body
-	if !utils.IsNilOrEmpty(req.Body) {
-		body = json.ToJSON(req.Body)
+	if !IsNilOrEmpty(req.Body) {
+		body = ToJSON(req.Body)
 	}
 
 	ctxClient, cancel := context.WithTimeout(ctx, clientTimeout)
@@ -77,7 +74,7 @@ func POST(ctx context.Context, req *Request) *Response {
 	// created request
 	request, err := http.NewRequestWithContext(ctxClient, http.MethodPost, req.URL, bytes.NewBuffer(body))
 	if err != nil {
-		logger.Error(state, "Error created request {}", err)
+		LogError(state, "Error created request {}", err)
 		return &Response{HasError: true, Error: err}
 	}
 	// build header
@@ -85,14 +82,14 @@ func POST(ctx context.Context, req *Request) *Response {
 
 	// send request
 	resp, err := httpClient.Do(request)
-	if utils.IsNilOrEmpty(resp) {
-		logger.Error(state, "Error response is nil")
+	if IsNilOrEmpty(resp) {
+		LogError(state, "Error response is nil")
 		return &Response{HasError: true, Error: errors.New("error response is nil")}
 	}
 	if err != nil {
-		logger.Error(state, "Error while sending request {}", err)
+		LogError(state, "Error while sending request {}", err)
 		// error timeout
-		if utils.IsTimedOut(err) {
+		if IsTimedOut(err) {
 			return &Response{
 				HasError:  true,
 				IsTimeout: true,
@@ -109,7 +106,7 @@ func POST(ctx context.Context, req *Request) *Response {
 	// read body
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error(state, "Error while doing request {}", err)
+		LogError(state, "Error while doing request {}", err)
 		return &Response{HasError: true, Error: err}
 	}
 
@@ -121,10 +118,10 @@ func POST(ctx context.Context, req *Request) *Response {
 	response.Header = resp.Header
 
 	// mapping result
-	if !utils.IsNilOrEmpty(req.Result) {
-		response.Body = json.ToStruct(respBody, req.Result)
+	if !IsNilOrEmpty(req.Result) {
+		response.Body = ToStruct(respBody, req.Result)
 	} else {
-		response.Body = json.FromJSONBytes(respBody)
+		response.Body = FromJSONBytes(respBody)
 	}
 
 	return &response

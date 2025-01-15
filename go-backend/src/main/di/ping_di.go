@@ -5,13 +5,13 @@ package di
 import (
 	"github.com/BevisDev/backend-template/src/main/controller"
 	"github.com/BevisDev/backend-template/src/main/repository"
-	"github.com/BevisDev/backend-template/src/main/service/impl"
+	"github.com/BevisDev/backend-template/src/main/service/ping"
 	"github.com/google/wire"
 )
 
 func NewPingDI() *controller.PingController {
 	wire.Build(
-		impl.NewPingServiceImpl,
+		ping.NewPingServiceImpl,
 		repository.NewPingRepository,
 		controller.NewPingController,
 	)

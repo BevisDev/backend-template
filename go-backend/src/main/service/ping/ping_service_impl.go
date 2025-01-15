@@ -1,10 +1,9 @@
-package impl
+package ping
 
 import (
 	"context"
-	"github.com/BevisDev/backend-template/src/main/helper/redis"
+	"github.com/BevisDev/backend-template/src/main/helper"
 	"github.com/BevisDev/backend-template/src/main/repository"
-	"github.com/BevisDev/backend-template/src/main/service"
 )
 
 type PingServiceImpl struct {
@@ -13,7 +12,7 @@ type PingServiceImpl struct {
 
 func NewPingServiceImpl(
 	pingRepository repository.IPingRepository,
-) service.IPingService {
+) IPingService {
 	return &PingServiceImpl{
 		pingRepository: pingRepository,
 	}
@@ -28,12 +27,12 @@ func (impl *PingServiceImpl) PingDB(ctx context.Context) map[string]bool {
 
 func (impl *PingServiceImpl) PingRedis(ctx context.Context) map[string]bool {
 	var resp = make(map[string]bool)
-	if !redis.Set(ctx, "key1", 1, 10) {
+	if !helper.RedisSet(ctx, "key1", 1, 10) {
 		resp["Redis"] = false
 		return resp
 	}
 	var rs int
-	if !redis.Get(ctx, "key1", &rs) {
+	if !helper.RedisGet(ctx, "key1", &rs) {
 		resp["Redis"] = false
 		return resp
 	}

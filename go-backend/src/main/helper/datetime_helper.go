@@ -1,15 +1,15 @@
-package datetime
+package helper
 
 import (
 	"github.com/BevisDev/backend-template/src/main/consts"
 	"time"
 )
 
-func ToString(time time.Time, format string) string {
+func TimeToString(time time.Time, format string) string {
 	return time.Format(format)
 }
 
-func ToTime(timeStr string, format string) (time.Time, error) {
+func StringToTime(timeStr string, format string) (time.Time, error) {
 	parsedTime, err := time.Parse(format, timeStr)
 	if err != nil {
 		return time.Time{}, err

@@ -1,12 +1,10 @@
-package db
+package helper
 
 import (
 	"context"
 	"fmt"
 	"github.com/BevisDev/backend-template/src/main/config"
 	"github.com/BevisDev/backend-template/src/main/consts"
-	"github.com/BevisDev/backend-template/src/main/helper/logger"
-	"github.com/BevisDev/backend-template/src/main/helper/utils"
 	"sync"
 	"time"
 
@@ -23,9 +21,9 @@ var (
 
 func InitDB(state string) {
 	appConfig := config.AppConfig
-	if utils.IsNilOrEmpty(appConfig) ||
-		utils.IsNilOrEmpty(appConfig.Databases) {
-		logger.Fatal(state, "Error Config DB is not initialized")
+	if IsNilOrEmpty(appConfig) ||
+		IsNilOrEmpty(appConfig.Databases) {
+		LogFatal(state, "Error Config DB is not initialized")
 		return
 	}
 	if connectionMap == nil {
@@ -55,7 +53,7 @@ func newConnection(cf *config.Database, schema, state string) {
 			cf.Host, cf.Port, cf.Username, cf.Password, schema)
 		db, err = sqlx.Connect("sqlserver", connStr)
 		if err != nil {
-			logger.Fatal(state, "Error open connection to SQLServer: {}", err)
+			LogFatal(state, "Error open connection to SQLServer: {}", err)
 			return
 		}
 		break
@@ -64,17 +62,17 @@ func newConnection(cf *config.Database, schema, state string) {
 			cf.Username, cf.Password, cf.Host, cf.Port, schema)
 		db, err = sqlx.Connect("godror", connStr)
 		if err != nil {
-			logger.Fatal(state, "Error open connection to Oracle: {}", err)
+			LogFatal(state, "Error open connection to Oracle: {}", err)
 			return
 		}
 		break
 	default:
-		logger.Fatal(state, "Kind db {} not supported", cf.Kind)
+		LogFatal(state, "Kind db {} not supported", cf.Kind)
 		return
 	}
 
 	if db == nil {
-		logger.Fatal(state, "Error connect db {} is nil", schema)
+		LogFatal(state, "Error connect db {} is nil", schema)
 		return
 	}
 
@@ -85,13 +83,13 @@ func newConnection(cf *config.Database, schema, state string) {
 
 	// ping check connection
 	if err = db.Ping(); err != nil {
-		logger.Fatal("", "Error ping db {}: {}", schema, err)
+		LogFatal("", "Error ping db {}: {}", schema, err)
 		return
 	}
 
 	connectionMap[schema] = db
 	configDbMap[schema] = cf
-	logger.Info(state, "Connect db {} successful", schema)
+	LogInfo(state, "Connect db {} successful", schema)
 }
 
 func CloseAll() {
@@ -106,21 +104,21 @@ func GetDB(schema string) *sqlx.DB {
 
 func GetDBInfo(schema string) (*sqlx.DB, *config.Database, bool) {
 	if schema == "" {
-		logger.Error("", "Error GetList: schema is empty", schema)
+		LogError("", "Error GetList: schema is empty", schema)
 		return nil, nil, false
 	}
-	if utils.IsNilOrEmpty(connectionMap[schema]) ||
-		utils.IsNilOrEmpty(configDbMap[schema]) {
+	if IsNilOrEmpty(connectionMap[schema]) ||
+		IsNilOrEmpty(configDbMap[schema]) {
 		return nil, nil, false
 	}
 	return connectionMap[schema], configDbMap[schema], true
 }
 
 func GetList(ctx context.Context, dest interface{}, schema, query string, args ...interface{}) bool {
-	state := utils.GetState(ctx)
+	state := GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
+		LogError(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -129,14 +127,14 @@ func GetList(ctx context.Context, dest interface{}, schema, query string, args .
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if utils.IsNilOrEmpty(args) {
+	if IsNilOrEmpty(args) {
 		err = db.SelectContext(ctx, dest, query)
 	} else {
 		err = db.SelectContext(ctx, dest, query, args...)
 	}
 
 	if err != nil {
-		logger.Error(state, "Error GetList: query failed {}", err.Error())
+		LogError(state, "Error GetList: query failed {}", err.Error())
 		return false
 	}
 
@@ -144,10 +142,10 @@ func GetList(ctx context.Context, dest interface{}, schema, query string, args .
 }
 
 func GetUsingNamed(ctx context.Context, dest interface{}, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
+	state := GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Error(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
+		LogError(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -156,24 +154,24 @@ func GetUsingNamed(ctx context.Context, dest interface{}, schema, query string, 
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if utils.IsNilOrEmpty(args) {
+	if IsNilOrEmpty(args) {
 		err = db.GetContext(ctx, dest, query)
 	} else {
 		err = db.GetContext(ctx, dest, query, args)
 	}
 
 	if err != nil {
-		logger.Error(state, "Error GetUsingNamed query failed {}", err.Error())
+		LogError(state, "Error GetUsingNamed query failed {}", err.Error())
 		return false
 	}
 	return true
 }
 
 func GetUsingArgs(ctx context.Context, dest interface{}, schema, query string, args ...interface{}) bool {
-	state := utils.GetState(ctx)
+	state := GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Error(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
+		LogError(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -182,24 +180,24 @@ func GetUsingArgs(ctx context.Context, dest interface{}, schema, query string, a
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	if utils.IsNilOrEmpty(args) {
+	if IsNilOrEmpty(args) {
 		err = db.GetContext(ctx, dest, query)
 	} else {
 		err = db.GetContext(ctx, dest, query, args...)
 	}
 
 	if err != nil {
-		logger.Error(state, "Error GetUsingArgs query failed {}", err.Error())
+		LogError(state, "Error GetUsingArgs query failed {}", err.Error())
 		return false
 	}
 	return true
 }
 
-func Insert(ctx context.Context, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
+func DBInsert(ctx context.Context, schema, query string, args interface{}) bool {
+	state := GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Error(state, "Error Insert: db or cf is nil with schema {}", schema)
+		LogError(state, "Error Insert: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -209,7 +207,7 @@ func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
-		logger.Error(state, "Error BeginTxx in Insert method {}", err)
+		LogError(state, "Error BeginTxx in Insert method {}", err)
 		return false
 	}
 
@@ -223,18 +221,18 @@ func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 	}()
 
 	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
-		logger.Error(state, "Error Insert: query failed {}", err)
+		LogError(state, "Error Insert: query failed {}", err)
 		return false
 	}
 
 	return true
 }
 
-func Update(ctx context.Context, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
+func DBUpdate(ctx context.Context, schema, query string, args interface{}) bool {
+	state := GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Error(state, "Error Update: db or cf is nil with schema {}", schema)
+		LogError(state, "Error DBUpdate: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -244,7 +242,7 @@ func Update(ctx context.Context, schema, query string, args interface{}) bool {
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
-		logger.Error(state, "Error BeginTxx in Update method {}", err)
+		LogError(state, "Error BeginTxx in DBUpdate method {}", err)
 		return false
 	}
 
@@ -258,18 +256,18 @@ func Update(ctx context.Context, schema, query string, args interface{}) bool {
 	}()
 
 	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
-		logger.Error(state, "Error Update query failed {}", err)
+		LogError(state, "Error DBUpdate query failed {}", err)
 		return false
 	}
 
 	return true
 }
 
-func Delete(ctx context.Context, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
+func DBDelete(ctx context.Context, schema, query string, args interface{}) bool {
+	state := GetState(ctx)
 	db, cf, ok := GetDBInfo(schema)
 	if !ok {
-		logger.Error(state, "Error Delete: db or cf is nil with schema {}", schema)
+		LogError(state, "Error DBDelete: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -279,7 +277,7 @@ func Delete(ctx context.Context, schema, query string, args interface{}) bool {
 
 	tx, err := db.BeginTxx(ctx, nil)
 	if err != nil {
-		logger.Error(state, "Error BeginTxx in Delete method {}", err)
+		LogError(state, "Error BeginTxx in DBDelete method {}", err)
 		return false
 	}
 
@@ -293,7 +291,7 @@ func Delete(ctx context.Context, schema, query string, args interface{}) bool {
 	}()
 
 	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
-		logger.Error(state, "Error Delete: query failed {}", err)
+		LogError(state, "Error DBDelete: query failed {}", err)
 		return false
 	}
 

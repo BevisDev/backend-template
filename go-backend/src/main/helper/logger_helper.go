@@ -1,10 +1,9 @@
-package logger
+package helper
 
 import (
 	"fmt"
 	"github.com/BevisDev/backend-template/src/main/config"
 	"github.com/BevisDev/backend-template/src/main/consts"
-	"github.com/BevisDev/backend-template/src/main/helper/utils"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -30,7 +29,7 @@ var (
 	onceLogger sync.Once
 )
 
-type Request struct {
+type RequestLogger struct {
 	State  string
 	URL    string
 	Time   time.Time
@@ -40,7 +39,7 @@ type Request struct {
 	Body   any
 }
 
-type Response struct {
+type ResponseLogger struct {
 	State       string
 	DurationSec time.Duration
 	Status      int
@@ -49,8 +48,8 @@ type Response struct {
 }
 
 func InitLogger() *zap.Logger {
-	if utils.IsNilOrEmpty(config.AppConfig.ServerConfig.Profile) ||
-		utils.IsNilOrEmpty(config.AppConfig.LoggerConfig) {
+	if IsNilOrEmpty(config.AppConfig.ServerConfig.Profile) ||
+		IsNilOrEmpty(config.AppConfig.LoggerConfig) {
 		log.Fatal("Error config Logger is not initialized")
 		return appLogger
 	}
@@ -177,8 +176,8 @@ func logApp(level zapcore.Level, state string, msg string, args ...interface{}) 
 		newLogger(appFilename)
 	}
 	// check state
-	if utils.IsNilOrEmpty(state) {
-		state = utils.GenUUID()
+	if IsNilOrEmpty(state) {
+		state = GenUUID()
 	}
 
 	// formater message
@@ -231,23 +230,23 @@ func SyncAll() {
 	}
 }
 
-func Info(state, msg string, args ...interface{}) {
+func LogInfo(state, msg string, args ...interface{}) {
 	logApp(zapcore.InfoLevel, state, msg, args...)
 }
 
-func Error(state, msg string, args ...interface{}) {
+func LogError(state, msg string, args ...interface{}) {
 	logApp(zapcore.ErrorLevel, state, msg, args...)
 }
 
-func Warn(state, msg string, args ...interface{}) {
+func LogWarn(state, msg string, args ...interface{}) {
 	logApp(zapcore.WarnLevel, state, msg, args...)
 }
 
-func Fatal(state, msg string, args ...interface{}) {
+func LogFatal(state, msg string, args ...interface{}) {
 	logApp(zapcore.FatalLevel, state, msg, args...)
 }
 
-func RequestLogger(req *Request) {
+func LogRequest(req *RequestLogger) {
 	rrLogger.WithOptions(
 		zap.AddCallerSkip(1)).Info(
 		"[===== REQUEST INFO =====]",
@@ -261,7 +260,7 @@ func RequestLogger(req *Request) {
 	)
 }
 
-func ResponseLogger(resp *Response) {
+func LogResponse(resp *ResponseLogger) {
 	rrLogger.WithOptions(
 		zap.AddCallerSkip(1)).Info(
 		"[===== RESPONSE INFO =====]",

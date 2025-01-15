@@ -2,8 +2,7 @@ package response
 
 import (
 	"github.com/BevisDev/backend-template/src/main/consts"
-	"github.com/BevisDev/backend-template/src/main/helper/datetime"
-	"github.com/BevisDev/backend-template/src/main/helper/utils"
+	"github.com/BevisDev/backend-template/src/main/helper"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -27,16 +26,16 @@ type DataError struct {
 
 type Error struct {
 	ErrorCode int    `json:"error_code" example:"3000"`
-	Message   string `json:"message" example:"Invalid Request"`
+	Message   string `json:"message" example:"Invalid RequestLogger"`
 }
 
 func getResponseAt() string {
-	return datetime.ToString(time.Now(), consts.DATETIME_NO_TZ)
+	return helper.TimeToString(time.Now(), consts.DATETIME_NO_TZ)
 }
 
 func OK(c *gin.Context, data interface{}, code int) {
 	c.JSON(http.StatusOK, &Data{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  true,
 		Data:       data,
 		Code:       code,
@@ -47,7 +46,7 @@ func OK(c *gin.Context, data interface{}, code int) {
 
 func Created(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusCreated, &Data{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  true,
 		Data:       data,
 		Code:       consts.Created,
@@ -58,7 +57,7 @@ func Created(c *gin.Context, data interface{}) {
 
 func Unauthorized(c *gin.Context, code int) {
 	c.JSON(http.StatusUnauthorized, &DataError{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  false,
 		ResponseAt: getResponseAt(),
 		Error: &Error{
@@ -70,7 +69,7 @@ func Unauthorized(c *gin.Context, code int) {
 
 func BadRequest(c *gin.Context, code int) {
 	c.JSON(http.StatusBadRequest, &DataError{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  false,
 		ResponseAt: getResponseAt(),
 		Error: &Error{
@@ -82,7 +81,7 @@ func BadRequest(c *gin.Context, code int) {
 
 func ServerError(c *gin.Context, code int) {
 	c.JSON(http.StatusInternalServerError, &DataError{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  false,
 		ResponseAt: getResponseAt(),
 		Error: &Error{
@@ -94,7 +93,7 @@ func ServerError(c *gin.Context, code int) {
 
 func SetError(c *gin.Context, httpCode, code int) {
 	c.JSON(httpCode, &DataError{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  false,
 		ResponseAt: getResponseAt(),
 		Error: &Error{
@@ -106,7 +105,7 @@ func SetError(c *gin.Context, httpCode, code int) {
 
 func SetErrMsg(c *gin.Context, httpCode, code int, message string) {
 	c.JSON(httpCode, &DataError{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  false,
 		ResponseAt: getResponseAt(),
 		Error: &Error{
@@ -118,7 +117,7 @@ func SetErrMsg(c *gin.Context, httpCode, code int, message string) {
 
 func Timeout(c *gin.Context) {
 	c.JSON(http.StatusGatewayTimeout, &DataError{
-		State:      utils.GetState(c),
+		State:      helper.GetState(c),
 		IsSuccess:  false,
 		ResponseAt: getResponseAt(),
 		Error: &Error{
