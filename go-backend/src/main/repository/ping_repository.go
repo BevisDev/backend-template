@@ -14,10 +14,12 @@ func NewPingRepository() IPingRepository {
 
 func (p PingRepository) Get1MSSQL(ctx context.Context, schema string) bool {
 	var result int
-	return helper.GetUsingNamed(ctx, &result, schema, "SELECT 1", nil)
+	helper.DBGetUsingNamed(ctx, &result, schema, "SELECT 1", nil)
+	return result != 0
 }
 
 func (p PingRepository) Get1Orc(ctx context.Context, schema string) bool {
 	var result int
-	return helper.GetUsingNamed(ctx, &result, schema, "SELECT 1 FROM DUAL", nil)
+	helper.DBGetUsingNamed(ctx, &result, schema, "SELECT 1 FROM DUAL", nil)
+	return result != 0
 }

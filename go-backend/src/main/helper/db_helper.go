@@ -102,7 +102,7 @@ func GetDB(schema string) *sqlx.DB {
 	return connectionMap[schema]
 }
 
-func GetDBInfo(schema string) (*sqlx.DB, *config.Database, bool) {
+func GetDBAndConfig(schema string) (*sqlx.DB, *config.Database, bool) {
 	if schema == "" {
 		LogError("", "Error GetList: schema is empty", schema)
 		return nil, nil, false
@@ -114,12 +114,12 @@ func GetDBInfo(schema string) (*sqlx.DB, *config.Database, bool) {
 	return connectionMap[schema], configDbMap[schema], true
 }
 
-func GetList(ctx context.Context, dest interface{}, schema, query string, args ...interface{}) bool {
+func DBGetList[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
 	state := GetState(ctx)
-	db, cf, ok := GetDBInfo(schema)
+	db, cf, ok := GetDBAndConfig(schema)
 	if !ok {
-		LogError(state, "Error GetList: db or cf is nil with schema {}", schema)
-		return false
+		LogError(state, "Error DBGetList: db or cf is nil with schema {}", schema)
+		return
 	}
 
 	var timeout = time.Duration(cf.TimeoutSec) * time.Second
@@ -134,19 +134,17 @@ func GetList(ctx context.Context, dest interface{}, schema, query string, args .
 	}
 
 	if err != nil {
-		LogError(state, "Error GetList: query failed {}", err.Error())
-		return false
+		LogError(state, "Error DBGetList: query failed {}", err.Error())
+		return
 	}
-
-	return true
 }
 
-func GetUsingNamed(ctx context.Context, dest interface{}, schema, query string, args interface{}) bool {
+func DBGetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, args interface{}) {
 	state := GetState(ctx)
-	db, cf, ok := GetDBInfo(schema)
+	db, cf, ok := GetDBAndConfig(schema)
 	if !ok {
-		LogError(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
-		return false
+		LogError(state, "Error DBGetUsingNamed: db or cf is nil with schema {}", schema)
+		return
 	}
 
 	var timeout = time.Duration(cf.TimeoutSec) * time.Second
@@ -161,18 +159,17 @@ func GetUsingNamed(ctx context.Context, dest interface{}, schema, query string, 
 	}
 
 	if err != nil {
-		LogError(state, "Error GetUsingNamed query failed {}", err.Error())
-		return false
+		LogError(state, "Error DBGetUsingNamed query failed {}", err.Error())
+		return
 	}
-	return true
 }
 
-func GetUsingArgs(ctx context.Context, dest interface{}, schema, query string, args ...interface{}) bool {
+func DBGetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
 	state := GetState(ctx)
-	db, cf, ok := GetDBInfo(schema)
+	db, cf, ok := GetDBAndConfig(schema)
 	if !ok {
-		LogError(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
-		return false
+		LogError(state, "Error DBGetUsingArgs: db or cf is nil with schema {}", schema)
+		return
 	}
 
 	var timeout = time.Duration(cf.TimeoutSec) * time.Second
@@ -187,15 +184,14 @@ func GetUsingArgs(ctx context.Context, dest interface{}, schema, query string, a
 	}
 
 	if err != nil {
-		LogError(state, "Error GetUsingArgs query failed {}", err.Error())
-		return false
+		LogError(state, "Error DBGetUsingArgs query failed {}", err.Error())
+		return
 	}
-	return true
 }
 
 func DBInsert(ctx context.Context, schema, query string, args interface{}) bool {
 	state := GetState(ctx)
-	db, cf, ok := GetDBInfo(schema)
+	db, cf, ok := GetDBAndConfig(schema)
 	if !ok {
 		LogError(state, "Error Insert: db or cf is nil with schema {}", schema)
 		return false
@@ -230,7 +226,7 @@ func DBInsert(ctx context.Context, schema, query string, args interface{}) bool 
 
 func DBUpdate(ctx context.Context, schema, query string, args interface{}) bool {
 	state := GetState(ctx)
-	db, cf, ok := GetDBInfo(schema)
+	db, cf, ok := GetDBAndConfig(schema)
 	if !ok {
 		LogError(state, "Error DBUpdate: db or cf is nil with schema {}", schema)
 		return false
@@ -265,7 +261,7 @@ func DBUpdate(ctx context.Context, schema, query string, args interface{}) bool 
 
 func DBDelete(ctx context.Context, schema, query string, args interface{}) bool {
 	state := GetState(ctx)
-	db, cf, ok := GetDBInfo(schema)
+	db, cf, ok := GetDBAndConfig(schema)
 	if !ok {
 		LogError(state, "Error DBDelete: db or cf is nil with schema {}", schema)
 		return false

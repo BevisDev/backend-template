@@ -32,10 +32,7 @@ func (impl *PingServiceImpl) PingRedis(ctx context.Context) map[string]bool {
 		return resp
 	}
 	var rs int
-	if !helper.RedisGet(ctx, "key1", &rs) {
-		resp["Redis"] = false
-		return resp
-	}
-	resp["Redis"] = true
+	helper.RedisGet(ctx, "key1", &rs)
+	resp["Redis"] = rs != 0
 	return resp
 }

@@ -1,7 +1,8 @@
 # name app build
 APP_NAME = gobe
 
-# main file
+# dir and main
+RESOURCES_DIR = src/resources
 MAIN_DIR = src/main
 MAIN_FILE = $(MAIN_DIR)/main.go
 
@@ -15,13 +16,13 @@ swag_install:
 
 swag_gen:
 	@echo "Generating swag.."
-	@swag init --generalInfo ./src/main/main.go --output ./src/resources/swagger
+	@swag init --generalInfo $(MAIN_FILE) --output $(RESOURCES_DIR)/swagger
 
 swag_build: swag_install
 	@echo "Remove Dir Swag"
 	@rm -rf $(RESOUCES_DIR)/swagger
 	@echo "Generating swag.."
-	@swag init --generalInfo $(MAIN_DIR)/main.go --output $(RESOUCES_DIR)/swagger
+	@swag init --generalInfo $(MAIN_FILE) --output $(RESOURCES_DIR)/swagger
 
 # Install Wire
 wire_install:

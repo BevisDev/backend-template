@@ -68,22 +68,21 @@ func RedisSet(ctx context.Context, key string, value interface{}, expiredTimeSec
 	return true
 }
 
-func RedisGet(ctx context.Context, key string, result interface{}) bool {
+func RedisGet[T any](ctx context.Context, key string, result *T) {
 	state := GetState(ctx)
 	val, err := redisClient.Get(ctx, key).Result()
 	if err != nil {
 		LogError(state, "Error Redis get failed {}", err)
-		return false
+		return
 	}
 	if val == "" {
 		LogError(state, "Error get value in Redis with key {} is empty", key)
-		return false
+		return
 	}
 	if err = FromJSONStr(val, &result); err != nil {
 		LogError(state, "Error deserialize JSON with type result {}, err {}", reflect.TypeOf(result), err)
-		return false
+		return
 	}
-	return true
 }
 
 func RedisDelete(ctx context.Context, key string) bool {

@@ -30,6 +30,15 @@ func IsNilOrEmpty(inp interface{}) bool {
 	}
 }
 
+func IsContains[T comparable](arr []T, value T) bool {
+	for _, v := range arr {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
 func IsPtrOrStruct(inp interface{}) bool {
 	return reflect.ValueOf(inp).Kind() == reflect.Ptr ||
 		reflect.ValueOf(inp).Kind() == reflect.Struct

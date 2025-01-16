@@ -12,11 +12,23 @@ func GenUUID() string {
 }
 
 func GetState(ctx context.Context) string {
+	if ctx == nil {
+		return GenUUID()
+	}
 	state, ok := ctx.Value("state").(string)
 	if !ok {
 		state = GenUUID()
 	}
 	return state
+}
+
+func CreateCtx(state string) context.Context {
+	ctx := context.Background()
+	if state == "" {
+		state = GenUUID()
+	}
+	ctx = context.WithValue(ctx, "state", state)
+	return ctx
 }
 
 func Batches[T any](source []T, length int) ([][]T, error) {
