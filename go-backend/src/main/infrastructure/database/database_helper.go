@@ -2,124 +2,33 @@ package database
 
 import (
 	"context"
-	"fmt"
-	"github.com/BevisDev/backend-template/src/main/common/consts"
 	"github.com/BevisDev/backend-template/src/main/common/utils"
 	"github.com/BevisDev/backend-template/src/main/infrastructure/config"
 	"github.com/BevisDev/backend-template/src/main/infrastructure/logger"
-	"sync"
-	"time"
-
-	//_ "github.com/denisenkom/go-mssqldb"
-	//_ "github.com/godror/godror"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
-
-var (
-	onceDb        sync.Once
-	connectionMap map[string]*sqlx.DB
-	configDbMap   map[string]*config.Database
-)
-
-func InitDB(state string) {
-	appConfig := config.AppConfig
-	if utils.IsNilOrEmpty(appConfig) ||
-		utils.IsNilOrEmpty(appConfig.Databases) {
-		logger.Fatal(state, "Error Config DB is not initialized")
-		return
-	}
-	if connectionMap == nil {
-		connectionMap = make(map[string]*sqlx.DB)
-	}
-	if configDbMap == nil {
-		configDbMap = make(map[string]*config.Database)
-	}
-	onceDb.Do(func() {
-		for _, db := range config.AppConfig.Databases {
-			for _, schema := range db.Schema {
-				newConnection(&db, schema, state)
-			}
-		}
-	})
-}
-
-func newConnection(cf *config.Database, schema, state string) {
-	var connStr string
-	var db *sqlx.DB
-	var err error
-
-	// build connectionString
-	switch cf.Kind {
-	case consts.SQLServer:
-		connStr = fmt.Sprintf("server=%s;port=%d;user id=%s;password=%s;database=%s",
-			cf.Host, cf.Port, cf.Username, cf.Password, schema)
-		db, err = sqlx.Connect("sqlserver", connStr)
-		if err != nil {
-			logger.Fatal(state, "Error open connection to SQLServer: {}", err)
-			return
-		}
-		break
-	case consts.Oracle:
-		connStr = fmt.Sprintf("user=%s password=%s connectString=%s:%d/%s",
-			cf.Username, cf.Password, cf.Host, cf.Port, schema)
-		db, err = sqlx.Connect("godror", connStr)
-		if err != nil {
-			logger.Fatal(state, "Error open connection to Oracle: {}", err)
-			return
-		}
-		break
-	default:
-		logger.Fatal(state, "Kind db {} not supported", cf.Kind)
-		return
-	}
-
-	if db == nil {
-		logger.Fatal(state, "Error connect db {} is nil", schema)
-		return
-	}
-
-	// set pool
-	db.SetMaxOpenConns(cf.MaxOpenConns)
-	db.SetMaxIdleConns(cf.MaxIdleConns)
-	db.SetConnMaxIdleTime(time.Duration(cf.ConnMaxLifeTime) * time.Second)
-
-	// ping check connection
-	if err = db.Ping(); err != nil {
-		logger.Fatal("", "Error ping db {}: {}", schema, err)
-		return
-	}
-
-	connectionMap[schema] = db
-	configDbMap[schema] = cf
-	logger.Info(state, "Connect db {} successful", schema)
-}
-
-func CloseAll() {
-	for _, v := range connectionMap {
-		v.Close()
-	}
-}
 
 func GetDB(schema string) *sqlx.DB {
 	return connectionMap[schema]
 }
 
-func GetDBAndConfig(schema string) (*sqlx.DB, *config.Database, bool) {
+func GetDBAndConfig(schema string) (*sqlx.DB, *config.Database) {
 	if schema == "" {
 		logger.Error("", "Error GetList: schema is empty", schema)
-		return nil, nil, false
+		return nil, nil
 	}
 	if utils.IsNilOrEmpty(connectionMap[schema]) ||
-		utils.IsNilOrEmpty(configDbMap[schema]) {
-		return nil, nil, false
+		utils.IsNilOrEmpty(dbConfigMap[schema]) {
+		return nil, nil
 	}
-	return connectionMap[schema], configDbMap[schema], true
+	return connectionMap[schema], dbConfigMap[schema]
 }
 
 func GetList[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
 	state := utils.GetState(ctx)
-	db, cf, ok := GetDBAndConfig(schema)
-	if !ok {
+	db, cf := GetDBAndConfig(schema)
+	if db == nil || cf == nil {
 		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return
 	}
@@ -143,9 +52,9 @@ func GetList[T any](ctx context.Context, dest *T, schema, query string, args ...
 
 func GetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, args interface{}) {
 	state := utils.GetState(ctx)
-	db, cf, ok := GetDBAndConfig(schema)
-	if !ok {
-		logger.Error(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
+	db, cf := GetDBAndConfig(schema)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return
 	}
 
@@ -168,9 +77,9 @@ func GetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, ar
 
 func GetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
 	state := utils.GetState(ctx)
-	db, cf, ok := GetDBAndConfig(schema)
-	if !ok {
-		logger.Error(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
+	db, cf := GetDBAndConfig(schema)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return
 	}
 
@@ -193,9 +102,9 @@ func GetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, arg
 
 func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
-	db, cf, ok := GetDBAndConfig(schema)
-	if !ok {
-		logger.Error(state, "Error Insert: db or cf is nil with schema {}", schema)
+	db, cf := GetDBAndConfig(schema)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -228,9 +137,9 @@ func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 
 func Update(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
-	db, cf, ok := GetDBAndConfig(schema)
-	if !ok {
-		logger.Error(state, "Error Update: db or cf is nil with schema {}", schema)
+	db, cf := GetDBAndConfig(schema)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -263,9 +172,9 @@ func Update(ctx context.Context, schema, query string, args interface{}) bool {
 
 func Delete(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
-	db, cf, ok := GetDBAndConfig(schema)
-	if !ok {
-		logger.Error(state, "Error Delete: db or cf is nil with schema {}", schema)
+	db, cf := GetDBAndConfig(schema)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return false
 	}
 

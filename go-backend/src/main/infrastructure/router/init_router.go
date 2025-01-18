@@ -3,10 +3,10 @@ package router
 import (
 	"github.com/BevisDev/backend-template/src/main/adapter/api"
 	"github.com/BevisDev/backend-template/src/main/adapter/dto/response"
-	"github.com/BevisDev/backend-template/src/main/adapter/middleware"
 	"github.com/BevisDev/backend-template/src/main/common/consts"
 	"github.com/BevisDev/backend-template/src/main/infrastructure/config"
 	"github.com/BevisDev/backend-template/src/main/infrastructure/di"
+	"github.com/BevisDev/backend-template/src/main/infrastructure/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
