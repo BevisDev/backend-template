@@ -31,7 +31,7 @@ wire_install:
 
 wire_gen:
 	@echo "Generating wire..."
-	@cd src/main/di && wire gen
+	@cd src/main/infrastructure/di && wire gen
 
 # Build the application
 build: 

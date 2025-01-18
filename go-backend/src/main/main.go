@@ -1,6 +1,8 @@
 package main
 
-import "github.com/BevisDev/backend-template/src/main/startup"
+import (
+	"github.com/BevisDev/backend-template/src/main/infrastructure/startup"
+)
 import _ "github.com/BevisDev/backend-template/src/resources/swagger"
 
 // @title           API Specification
