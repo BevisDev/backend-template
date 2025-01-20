@@ -10,18 +10,24 @@ import (
 
 func Set(ctx context.Context, key string, value interface{}, expiredTimeSec int) bool {
 	state := utils.GetState(ctx)
-	var v interface{}
-	if utils.IsPtrOrStruct(value) {
-		v = utils.ToJSON(value)
-	} else {
-		v = value
-	}
-	err := redisClient.Set(ctx, key, v, time.Duration(expiredTimeSec)*time.Second).Err()
+	err := redisClient.Set(ctx, key, marshalValue(value), time.Duration(expiredTimeSec)*time.Second).Err()
 	if err != nil {
 		logger.Error(state, "Error Redis set failed {}", err)
 		return false
 	}
 	return true
+}
+
+func marshalValue(value interface{}) interface{} {
+	v := reflect.ValueOf(value)
+	if v.Kind() == reflect.Ptr ||
+		v.Kind() == reflect.Struct ||
+		v.Kind() == reflect.Map ||
+		v.Kind() == reflect.Slice ||
+		v.Kind() == reflect.Array {
+		return utils.ToJSON(value)
+	}
+	return value
 }
 
 func Get(ctx context.Context, key string, result interface{}) bool {

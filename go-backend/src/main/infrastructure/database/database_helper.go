@@ -9,13 +9,19 @@ import (
 	"time"
 )
 
+func CloseAll() {
+	for _, v := range connectionMap {
+		v.Close()
+	}
+}
+
 func GetDB(schema string) *sqlx.DB {
 	return connectionMap[schema]
 }
 
-func GetDBAndConfig(schema string) (*sqlx.DB, *config.Database) {
+func getDBAndConfig(schema string) (*sqlx.DB, *config.Database) {
 	if schema == "" {
-		logger.Error("", "Error GetList: schema is empty", schema)
+		logger.Error("", "Error getDBAndConfig: schema is empty", schema)
 		return nil, nil
 	}
 	if utils.IsNilOrEmpty(connectionMap[schema]) ||
@@ -27,7 +33,7 @@ func GetDBAndConfig(schema string) (*sqlx.DB, *config.Database) {
 
 func GetList[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
 	state := utils.GetState(ctx)
-	db, cf := GetDBAndConfig(schema)
+	db, cf := getDBAndConfig(schema)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return
@@ -52,9 +58,9 @@ func GetList[T any](ctx context.Context, dest *T, schema, query string, args ...
 
 func GetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, args interface{}) {
 	state := utils.GetState(ctx)
-	db, cf := GetDBAndConfig(schema)
+	db, cf := getDBAndConfig(schema)
 	if db == nil || cf == nil {
-		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
 		return
 	}
 
@@ -77,9 +83,9 @@ func GetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, ar
 
 func GetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
 	state := utils.GetState(ctx)
-	db, cf := GetDBAndConfig(schema)
+	db, cf := getDBAndConfig(schema)
 	if db == nil || cf == nil {
-		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
 		return
 	}
 
@@ -102,9 +108,9 @@ func GetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, arg
 
 func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
-	db, cf := GetDBAndConfig(schema)
+	db, cf := getDBAndConfig(schema)
 	if db == nil || cf == nil {
-		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error Insert: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -137,9 +143,9 @@ func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 
 func Update(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
-	db, cf := GetDBAndConfig(schema)
+	db, cf := getDBAndConfig(schema)
 	if db == nil || cf == nil {
-		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error Update: db or cf is nil with schema {}", schema)
 		return false
 	}
 
@@ -172,9 +178,9 @@ func Update(ctx context.Context, schema, query string, args interface{}) bool {
 
 func Delete(ctx context.Context, schema, query string, args interface{}) bool {
 	state := utils.GetState(ctx)
-	db, cf := GetDBAndConfig(schema)
+	db, cf := getDBAndConfig(schema)
 	if db == nil || cf == nil {
-		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
+		logger.Error(state, "Error Delete: db or cf is nil with schema {}", schema)
 		return false
 	}
 

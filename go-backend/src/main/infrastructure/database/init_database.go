@@ -92,9 +92,3 @@ func newConnection(cf *config.Database, schema, state string) {
 	dbConfigMap[schema] = cf
 	logger.Info(state, "Connect db {} successful", schema)
 }
-
-func CloseAll() {
-	for _, v := range connectionMap {
-		v.Close()
-	}
-}

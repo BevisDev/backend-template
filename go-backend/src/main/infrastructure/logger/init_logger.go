@@ -218,15 +218,3 @@ func formatMessage(msg string, args ...interface{}) string {
 	}
 	return fmt.Sprintf(message, args...)
 }
-
-func SyncAll() {
-	if appLogger != nil {
-		appLogger.Sync()
-	}
-	if rrLogger != nil {
-		rrLogger.Sync()
-	}
-	if extLogger != nil {
-		extLogger.Sync()
-	}
-}

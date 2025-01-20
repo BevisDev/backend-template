@@ -8,8 +8,8 @@ package di
 
 import (
 	"github.com/BevisDev/backend-template/src/main/adapter/controller"
-	"github.com/BevisDev/backend-template/src/main/adapter/repositoryImpl"
 	"github.com/BevisDev/backend-template/src/main/application/service/impl"
+	"github.com/BevisDev/backend-template/src/main/domain/repository/repositoryImpl"
 )
 
 // Injectors from ping_di.go:

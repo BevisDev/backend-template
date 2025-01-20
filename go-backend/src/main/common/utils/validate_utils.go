@@ -39,11 +39,6 @@ func IsContains[T comparable](arr []T, value T) bool {
 	return false
 }
 
-func IsPtrOrStruct(inp interface{}) bool {
-	return reflect.ValueOf(inp).Kind() == reflect.Ptr ||
-		reflect.ValueOf(inp).Kind() == reflect.Struct
-}
-
 func IsTimedOut(err error) bool {
 	return errors.Is(err, context.DeadlineExceeded)
 }

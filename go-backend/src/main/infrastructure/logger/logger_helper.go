@@ -5,6 +5,18 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+func SyncAll() {
+	if appLogger != nil {
+		appLogger.Sync()
+	}
+	if rrLogger != nil {
+		rrLogger.Sync()
+	}
+	if extLogger != nil {
+		extLogger.Sync()
+	}
+}
+
 func Info(state, msg string, args ...interface{}) {
 	logApp(zapcore.InfoLevel, state, msg, args...)
 }
