@@ -33,6 +33,7 @@ Utilities
 
 - [UUID](https://github.com/google/uuid)
 - [Wire](https://github.com/google/wire)
+- [RabbitMQ](#getting-rabbitmq)
 
 ### Technology stack
 
@@ -218,4 +219,12 @@ go get -u github.com/swaggo/files
 
 ```sh
 swag init --generalInfo ./src/main/startup/run.go --output ./src/resources/swagger
+```
+
+### Getting RabbitMQ
+
+Document: [RabbitMQ](https://github.com/rabbitmq/amqp091-go)
+
+```sh
+go get github.com/rabbitmq/amqp091-go
 ```

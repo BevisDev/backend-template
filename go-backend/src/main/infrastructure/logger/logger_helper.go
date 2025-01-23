@@ -58,3 +58,27 @@ func LogResponse(resp *ResponseLogger) {
 		zap.Any("body", resp.Body),
 	)
 }
+
+func LogExtRequest(req *RequestLogger) {
+	extLogger.WithOptions(
+		zap.AddCallerSkip(2)).Info(
+		"[===== REQUEST EXTERNAL INFO =====]",
+		zap.String("state", req.State),
+		zap.String("url", req.URL),
+		zap.Time("time", req.Time),
+		zap.String("method", req.Method),
+		zap.String("query", req.Query),
+		zap.Any("body", req.Body),
+	)
+}
+
+func LogExtResponse(resp *ResponseLogger) {
+	extLogger.WithOptions(
+		zap.AddCallerSkip(1)).Info(
+		"[===== RESPONSE EXTERNAL INFO =====]",
+		zap.String("state", resp.State),
+		zap.Int("status", resp.Status),
+		zap.Float64("durationSec", resp.DurationSec.Seconds()),
+		zap.Any("body", resp.Body),
+	)
+}

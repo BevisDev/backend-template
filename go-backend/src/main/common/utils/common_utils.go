@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"math"
+	"time"
 )
 
 func GenUUID() string {
@@ -29,6 +30,13 @@ func CreateCtx(state string) context.Context {
 	}
 	ctx = context.WithValue(ctx, "state", state)
 	return ctx
+}
+
+func CreateCtxTimeout(ctx context.Context, timeoutSec int) (context.Context, context.CancelFunc) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return context.WithTimeout(ctx, time.Duration(timeoutSec)*time.Second)
 }
 
 func Batches[T any](source []T, length int) ([][]T, error) {

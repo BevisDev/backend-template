@@ -6,7 +6,6 @@ import (
 	"github.com/BevisDev/backend-template/src/main/infrastructure/config"
 	"github.com/BevisDev/backend-template/src/main/infrastructure/logger"
 	"github.com/jmoiron/sqlx"
-	"time"
 )
 
 func CloseAll() {
@@ -31,17 +30,24 @@ func getDBAndConfig(schema string) (*sqlx.DB, *config.Database) {
 	return connectionMap[schema], dbConfigMap[schema]
 }
 
-func GetList[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
-	state := utils.GetState(ctx)
-	db, cf := getDBAndConfig(schema)
+func logQuery(state, query string) {
+	if isDev {
+		logger.Info(state, "Query: {}", query)
+	}
+}
+
+func GetList[T any](c context.Context, dest *T, schema, query string, args ...interface{}) {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+		err    error
+	)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error GetList: db or cf is nil with schema {}", schema)
 		return
 	}
-
-	var timeout = time.Duration(cf.TimeoutSec) * time.Second
-	var err error
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
 	defer cancel()
 
 	if utils.IsNilOrEmpty(args) {
@@ -56,17 +62,19 @@ func GetList[T any](ctx context.Context, dest *T, schema, query string, args ...
 	}
 }
 
-func GetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, args interface{}) {
-	state := utils.GetState(ctx)
-	db, cf := getDBAndConfig(schema)
+func GetUsingNamed[T any](c context.Context, dest *T, schema, query string, args interface{}) {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+		err    error
+	)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error GetUsingNamed: db or cf is nil with schema {}", schema)
 		return
 	}
 
-	var timeout = time.Duration(cf.TimeoutSec) * time.Second
-	var err error
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
 	defer cancel()
 
 	if utils.IsNilOrEmpty(args) {
@@ -81,17 +89,19 @@ func GetUsingNamed[T any](ctx context.Context, dest *T, schema, query string, ar
 	}
 }
 
-func GetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, args ...interface{}) {
-	state := utils.GetState(ctx)
-	db, cf := getDBAndConfig(schema)
+func GetUsingArgs[T any](c context.Context, dest *T, schema, query string, args ...interface{}) {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+		err    error
+	)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error GetUsingArgs: db or cf is nil with schema {}", schema)
 		return
 	}
 
-	var timeout = time.Duration(cf.TimeoutSec) * time.Second
-	var err error
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
 	defer cancel()
 
 	if utils.IsNilOrEmpty(args) {
@@ -106,16 +116,57 @@ func GetUsingArgs[T any](ctx context.Context, dest *T, schema, query string, arg
 	}
 }
 
-func Insert(ctx context.Context, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
-	db, cf := getDBAndConfig(schema)
+func ExecQuery(c context.Context, isSelect bool, schema, query string, args ...interface{}) bool {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+		err    error
+		tx     *sqlx.Tx
+	)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error ExecQuery: db or cf is nil with schema {}", schema)
+		return false
+	}
+	logQuery(state, query)
+
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
+	defer cancel()
+
+	if !isSelect {
+		tx, err = db.BeginTxx(ctx, nil)
+		if err != nil {
+			logger.Error(state, "Error BeginTxx in ExecQuery method {}", err)
+			return false
+
+		}
+	}
+
+	_, err = db.ExecContext(ctx, query, args...)
+	if err != nil {
+		logger.Error(state, "Error ExecQuery {} ", err)
+		if !isSelect {
+			tx.Rollback()
+		}
+		return false
+	}
+	if !isSelect {
+		err = tx.Commit()
+	}
+	return true
+}
+
+func Insert(c context.Context, schema, query string, args interface{}) bool {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+	)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error Insert: db or cf is nil with schema {}", schema)
 		return false
 	}
 
-	var timeout = time.Duration(cf.TimeoutSec) * time.Second
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
 	defer cancel()
 
 	tx, err := db.BeginTxx(ctx, nil)
@@ -124,33 +175,59 @@ func Insert(ctx context.Context, schema, query string, args interface{}) bool {
 		return false
 	}
 
-	// rollback if has error
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
-
-	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
-		logger.Error(state, "Error Insert: query failed {}", err)
+	_, err = db.NamedExecContext(ctx, query, args)
+	if err != nil {
+		logger.Error(state, "Error Insert {} ", err)
+		tx.Rollback()
 		return false
 	}
-
+	tx.Commit()
 	return true
 }
 
-func Update(ctx context.Context, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
-	db, cf := getDBAndConfig(schema)
+func InsertedId(c context.Context, col int, schema, query string, args ...interface{}) (int, bool) {
+	var (
+		state  = utils.GetState(c)
+		id     int
+		db, cf = getDBAndConfig(schema)
+	)
+	if db == nil || cf == nil {
+		logger.Error(state, "Error Insert: db or cf is nil with schema {}", schema)
+		return id, false
+	}
+
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
+	defer cancel()
+
+	tx, err := db.BeginTxx(ctx, nil)
+	if err != nil {
+		logger.Error(state, "Error BeginTxx in Insert method {}", err)
+		return id, false
+	}
+
+	err = db.QueryRowContext(ctx, query, args...).Scan(&id)
+	if err != nil {
+		logger.Error(state, "Error InsertedId {} ", err)
+		tx.Rollback()
+		return id, false
+	}
+	tx.Commit()
+	return id, true
+}
+
+func Update(c context.Context, schema, query string, args interface{}) bool {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+	)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error Update: db or cf is nil with schema {}", schema)
 		return false
 	}
 
-	var timeout = time.Duration(cf.TimeoutSec) * time.Second
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
 	defer cancel()
 
 	tx, err := db.BeginTxx(ctx, nil)
@@ -159,33 +236,28 @@ func Update(ctx context.Context, schema, query string, args interface{}) bool {
 		return false
 	}
 
-	// rollback if has error
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
-
-	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
-		logger.Error(state, "Error Update query failed {}", err)
+	_, err = db.NamedExecContext(ctx, query, args)
+	if err != nil {
+		logger.Error(state, "Error Update {} ", err)
+		tx.Rollback()
 		return false
 	}
-
+	tx.Commit()
 	return true
 }
 
-func Delete(ctx context.Context, schema, query string, args interface{}) bool {
-	state := utils.GetState(ctx)
-	db, cf := getDBAndConfig(schema)
+func Delete(c context.Context, schema, query string, args interface{}) bool {
+	var (
+		state  = utils.GetState(c)
+		db, cf = getDBAndConfig(schema)
+	)
 	if db == nil || cf == nil {
 		logger.Error(state, "Error Delete: db or cf is nil with schema {}", schema)
 		return false
 	}
 
-	var timeout = time.Duration(cf.TimeoutSec) * time.Second
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+	logQuery(state, query)
+	ctx, cancel := utils.CreateCtxTimeout(c, cf.TimeoutSec)
 	defer cancel()
 
 	tx, err := db.BeginTxx(ctx, nil)
@@ -194,19 +266,12 @@ func Delete(ctx context.Context, schema, query string, args interface{}) bool {
 		return false
 	}
 
-	// rollback if has error
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
-
-	if _, err = db.NamedExecContext(ctx, query, args); err != nil {
-		logger.Error(state, "Error Delete: query failed {}", err)
+	_, err = db.NamedExecContext(ctx, query, args)
+	if err != nil {
+		logger.Error(state, "Error Delete {} ", err)
+		tx.Rollback()
 		return false
 	}
-
+	tx.Commit()
 	return true
 }

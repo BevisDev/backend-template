@@ -5,29 +5,30 @@ import (
 	"github.com/BevisDev/backend-template/src/main/infrastructure/config"
 	"github.com/BevisDev/backend-template/src/main/infrastructure/logger"
 	"net/http"
+	"net/url"
 	"sync"
-	"time"
 )
 
 var (
 	restOnce      sync.Once
 	httpClient    *http.Client
-	clientTimeout time.Duration
+	clientTimeout int
 )
 
-type Request struct {
-	State  string
-	URL    string
-	Params map[string]any
-	Header map[string]string
-	Body   any
-	Result any
+type RestRequest struct {
+	State    string
+	URL      string
+	Params   map[string]any
+	Header   map[string]string
+	Body     any
+	BodyForm url.Values
+	Result   any
 }
 
-type Response struct {
+type RestResponse struct {
 	StatusCode int
 	Header     http.Header
-	Body       any
+	Body       string
 	HasError   bool
 	IsTimeout  bool
 	Error      error
@@ -42,7 +43,7 @@ func InitRestClient(state string) *http.Client {
 	}
 	restOnce.Do(func() {
 		httpClient = &http.Client{}
-		clientTimeout = time.Duration(config.AppConfig.ServerConfig.ClientTimeout) * time.Second
+		clientTimeout = config.AppConfig.ServerConfig.ClientTimeout
 	})
 	return httpClient
 }

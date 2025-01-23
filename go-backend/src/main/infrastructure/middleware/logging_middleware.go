@@ -26,8 +26,10 @@ func (w *ResponseWrapper) Write(b []byte) (int, error) {
 
 func LoggerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		startTime := time.Now()
-		state := c.GetHeader("state")
+		var (
+			state     = c.GetHeader("state")
+			startTime = time.Now()
+		)
 		if utils.IsNilOrEmpty(state) {
 			state = utils.GenUUID()
 		}
@@ -71,11 +73,12 @@ func LoggerHandler() gin.HandlerFunc {
 		c.Next()
 
 		// log response
-		respHeaders := c.Writer.Header()
+		var (
+			respHeaders = c.Writer.Header()
+			duration    = time.Since(startTime)
+			respBody    string
+		)
 		ignoreBody = isIgnoreBody(respHeaders)
-		duration := time.Since(startTime)
-
-		var respBody string
 		if !ignoreBody {
 			respBody = writer.body.String()
 		}

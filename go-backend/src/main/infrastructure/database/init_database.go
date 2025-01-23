@@ -18,6 +18,7 @@ var (
 	dbOnce        sync.Once
 	connectionMap map[string]*sqlx.DB
 	dbConfigMap   map[string]*config.Database
+	isDev         bool
 )
 
 func InitDB(state string) {
@@ -27,6 +28,7 @@ func InitDB(state string) {
 		logger.Fatal(state, "Error Config DB is not initialized")
 		return
 	}
+	isDev = appConfig.ServerConfig.Profile == "dev"
 	if connectionMap == nil {
 		connectionMap = make(map[string]*sqlx.DB)
 	}

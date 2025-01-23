@@ -36,6 +36,10 @@ type Config struct {
 		Index    int    `mapstructure:"index"`
 		PoolSize int    `mapstructure:"poolSize"`
 	} `mapstructure:"redis"`
+
+	RabbitMQConfig struct {
+		Url string `mapstructure:"url"`
+	} `mapstructure:"rabbitmq"`
 }
 
 type Database struct {

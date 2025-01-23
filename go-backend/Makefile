@@ -4,6 +4,7 @@ APP_NAME = gobe
 # dir and main
 RESOURCES_DIR = src/resources
 MAIN_DIR = src/main
+INFRAS_DIR = $(MAIN_DIR)/infrastructure
 MAIN_FILE = $(MAIN_DIR)/main.go
 
 # default build if not args in make
@@ -24,14 +25,14 @@ swag_build: swag_install
 	@echo "Generating swag.."
 	@swag init --generalInfo $(MAIN_FILE) --output $(RESOURCES_DIR)/swagger
 
-# Install Wire
-wire_install:
+# Install DI
+di_install:
 	@echo "Installing wire..."
 	@go install github.com/google/wire/cmd/wire@latest
 
-wire_gen:
+di_gen:
 	@echo "Generating wire..."
-	@cd src/main/infrastructure/di && wire gen
+	@cd $(INFRAS_DIR)/di && wire gen
 
 # Build the application
 build: 
