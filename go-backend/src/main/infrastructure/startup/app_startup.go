@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func startConfig() {
-	config.LoadConfig()
+func startConfig() *config.Config {
+	return config.LoadConfig()
 }
 
 func startDB(state string) {

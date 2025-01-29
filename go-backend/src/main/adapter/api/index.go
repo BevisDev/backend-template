@@ -5,5 +5,8 @@ import (
 )
 
 func RegisterAPIs(r *gin.RouterGroup) {
-	AuthAPI(r)
+	v1 := r.Group("/v1")
+	{
+		AuthAPI(v1)
+	}
 }

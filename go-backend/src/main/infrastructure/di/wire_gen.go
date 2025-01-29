@@ -12,6 +12,14 @@ import (
 	"github.com/BevisDev/backend-template/src/main/domain/repository/repositoryImpl"
 )
 
+// Injectors from auth_di.go:
+
+func NewAuthDI() *controller.AuthController {
+	iAuthService := impl.NewAuthServiceImpl()
+	authController := controller.NewAuthController(iAuthService)
+	return authController
+}
+
 // Injectors from ping_di.go:
 
 func NewPingDI() *controller.PingController {
@@ -19,4 +27,12 @@ func NewPingDI() *controller.PingController {
 	iPingService := impl.NewPingServiceImpl(iPingRepository)
 	pingController := controller.NewPingController(iPingService)
 	return pingController
+}
+
+// Injectors from user_di.go:
+
+func NewUserDI() *controller.UserController {
+	iUserService := impl.NewUserServiceImpl()
+	userController := controller.NewUserController(iUserService)
+	return userController
 }
