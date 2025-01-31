@@ -2,24 +2,40 @@
 
 ## Getting started
 
-### Prerequisites
+***Prerequisites***
 
 - [Go 1.23.4](https://go.dev/doc/install) or higher
 
-### Dependencies
+then create folder project
 
-- [Gin Gonic](https://github.com/gin-gonic/gin)
-- [Viper](https://github.com/spf13/viper)
-- [Zap](https://github.com/uber-go/zap)
-- [Lumberjack](https://github.com/natefinch/lumberjack)
-- [Cron](https://github.com/robfig/cron)
-- [Gorm](https://gorm.io/docs/index.html)
+```sh
+mkdir go-backend
+cd go-backend
+```
 
-### Utilities:
+using Go module
+
+```sh
+go mod init github.com/BevisDev/go-backend
+```
+
+using dependencies
+
+- [Framework](#getting-framework)
+- [Handle Configuration](#getting-viper)
+- [Handle Logger](#getting-logger)
+- [Handle Write log to rolling files](#getting-write-logs-to-rolling-files)
+- [Handle Cron](#getting-cron)
+- [Handle Databases](#getting-databases)
+- [Handle Redis](#getting-redis)
+
+Utilities
 
 - [UUID](https://github.com/google/uuid)
+- [Wire](https://github.com/google/wire)
+- [RabbitMQ](#getting-rabbitmq)
 
-## Technology stack
+### Technology stack
 
 > **Note:**
 >
@@ -49,7 +65,8 @@ Open PowerShell with **Administrator privileges** and run the following command:
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 ```
 
-After Chocolatey is installed, you can install `make` by running the following command in the PowerShell or Command Prompt:
+After Chocolatey is installed, you can install `make` by running the following command in the PowerShell or Command
+Prompt:
 
 ```sh
 choco install make
@@ -62,22 +79,9 @@ sudo apt update
 sudo apt install make
 ```
 
-### Init Go Module
-
-Create folder project
-
-```sh
-mkdir go-backend
-cd go-backend
-```
-
-Init Go module
-
-```sh
-go mod init github.com/BevisDev/go-backend
-```
-
 ### Getting Framework
+
+Using [Gin Gonic](https://github.com/gin-gonic/gin)
 
 ```sh
 go get -u github.com/gin-gonic/gin
@@ -89,19 +93,19 @@ go get -u github.com/gin-gonic/gin
 package main
 
 import (
-  "net/http"
+	"net/http"
 
-  "github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-  r := gin.Default()
-  r.GET("/ping", func(c *gin.Context) {
-    c.JSON(http.StatusOK, gin.H{
-      "message": "pong",
-    })
-  })
-  r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 ```
 
@@ -113,27 +117,33 @@ go run main.go
 
 Then visit [`0.0.0.0:8080/ping`](http://0.0.0.0:8080/ping) in your browser to see the response!
 
-## Getting Viper
+### Getting Viper
+
+Document: [Viper](https://github.com/spf13/viper)
 
 ```sh
 go get github.com/spf13/viper
 ```
 
-## Getting handler Logger
+### Getting logger
+
+Document: [Zap](https://github.com/uber-go/zap)
 
 ```sh
 go get -u go.uber.org/zap
 ```
 
-For writting logs to rolling files
+### Getting write logs to rolling files
+
+Document: [Lumberjack](https://github.com/natefinch/lumberjack)
 
 ```sh
 go get github.com/natefinch/lumberjack
 ```
 
-## Getting Cron
+### Getting Cron
 
-To schedule job runner
+Document: [Cron](https://github.com/robfig/cron)
 
 ```sh
 go get github.com/robfig/cron/v3@v3.0.0
@@ -143,13 +153,13 @@ go get github.com/robfig/cron/v3@v3.0.0
 
 A cron expression represents a set of times, using 6 space-separated fields.
 
-### Example:
+#### Example:
 
 ```go
 c := cron.New(cron.WithSeconds())
 // second minute hour day month weekday
-c.AddFunc("0 * * * * *", func() { 
-    fmt.Println("Running every minute at the 0th second!") 
+c.AddFunc("0 * * * * *", func () {
+fmt.Println("Running every minute at the 0th second!")
 })
 c.Start()
 ```
@@ -163,3 +173,58 @@ c.Start()
 | Month        | Yes        | 1-12 or JAN-DEC | * / , -                    |
 | Day of week  | Yes        | 0-6 or SUN-SAT  | * / , - ?                  |
 
+### Getting DI
+
+```sh
+go get github.com/google/wire/cmd/wire
+```
+
+### Getting Databases
+
+***Install Driver***
+
+- [SQL Server](https://github.com/denisenkom/go-mssqldb)
+
+```sh
+go get github.com/denisenkom/go-mssqldb
+```
+
+- [PostgreSQL](https://github.com/lib/pq)
+- [Oracle](https://github.com/godror/godror)
+- [Other Driver](https://go.dev/wiki/SQLDrivers)
+
+To use map into struct easily:
+
+```sh
+go get github.com/jmoiron/sqlx
+```
+
+### Getting Redis
+
+Document: [Redis](https://github.com/redis/go-redis)
+
+```sh
+go get github.com/redis/go-redis/v9
+```
+
+### Getting Swagger
+
+Document: [Swagger](https://github.com/swaggo/swag)
+
+```sh
+go get -u github.com/swaggo/swag/cmd/swag
+go get -u github.com/swaggo/gin-swagger
+go get -u github.com/swaggo/files
+```
+
+```sh
+swag init --generalInfo ./src/main/startup/run.go --output ./src/resources/swagger
+```
+
+### Getting RabbitMQ
+
+Document: [RabbitMQ](https://github.com/rabbitmq/amqp091-go)
+
+```sh
+go get github.com/rabbitmq/amqp091-go
+```

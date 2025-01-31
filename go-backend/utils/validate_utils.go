@@ -1,15 +1,17 @@
-package helper
+package utils
 
 import (
+	"context"
+	"errors"
 	"reflect"
 	"strings"
 )
 
-func IsNilOrEmpty(value interface{}) bool {
-	if value == nil {
+func IsNilOrEmpty(inp interface{}) bool {
+	if inp == nil {
 		return true
 	}
-	v := reflect.ValueOf(value)
+	v := reflect.ValueOf(inp)
 	switch v.Kind() {
 	case reflect.Invalid:
 		return true
@@ -26,4 +28,17 @@ func IsNilOrEmpty(value interface{}) bool {
 	default:
 		return false
 	}
+}
+
+func IsContains[T comparable](arr []T, value T) bool {
+	for _, v := range arr {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+func IsTimedOut(err error) bool {
+	return errors.Is(err, context.DeadlineExceeded)
 }

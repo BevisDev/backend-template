@@ -1,5 +1,6 @@
-package datetime
+package consts
 
+// datetime
 const (
 	YYYY_MM_DD       = "2006-01-02"
 	DD_MM_YYYY       = "02-01-2006"
@@ -22,4 +23,16 @@ const (
 	Day    = "Day"
 	Month  = "Month"
 	Year   = "Year"
+)
+
+// header
+const (
+	ContentType = "Content-Type"
+)
+
+// type db
+const (
+	SQLServer = "SQLServer"
+	Oracle    = "Oracle"
+	Postgres  = "Postgres"
 )

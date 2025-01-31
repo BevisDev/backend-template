@@ -1,14 +1,15 @@
-package datetime
+package utils
 
 import (
+	"github.com/BevisDev/backend-template/consts"
 	"time"
 )
 
-func ToString(time time.Time, format string) string {
+func TimeToString(time time.Time, format string) string {
 	return time.Format(format)
 }
 
-func ToTime(timeStr string, format string) (time.Time, error) {
+func StringToTime(timeStr string, format string) (time.Time, error) {
 	parsedTime, err := time.Parse(format, timeStr)
 	if err != nil {
 		return time.Time{}, err
@@ -16,27 +17,27 @@ func ToTime(timeStr string, format string) (time.Time, error) {
 	return parsedTime, nil
 }
 
-func StartOfDay(date time.Time) time.Time {
+func BeginDay(date time.Time) time.Time {
 	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 }
 
-func EndOfDay(date time.Time) time.Time {
+func EndDay(date time.Time) time.Time {
 	return time.Date(date.Year(), date.Month(), date.Day(), 23, 59, 59, 999999000, date.Location())
 }
 
 func AddTime(date time.Time, v int, kind string) time.Time {
 	switch kind {
-	case Second:
+	case consts.Second:
 		return date.Add(time.Duration(v) * time.Second)
-	case Minute:
+	case consts.Minute:
 		return date.Add(time.Duration(v) * time.Minute)
-	case Hour:
+	case consts.Hour:
 		return date.Add(time.Duration(v) * time.Hour)
-	case Day:
+	case consts.Day:
 		return date.AddDate(0, 0, v)
-	case Month:
+	case consts.Month:
 		return date.AddDate(0, v, 0)
-	case Year:
+	case consts.Year:
 		return date.AddDate(v, 0, 0)
 	default:
 		return date

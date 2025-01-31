@@ -1,7 +1,8 @@
-package json
+package utils
 
 import (
 	"encoding/json"
+	"reflect"
 )
 
 func ToJSON(v any) []byte {
@@ -18,6 +19,18 @@ func ToJSONStr(v any) string {
 		return "{}"
 	}
 	return string(jsonBytes)
+}
+
+func CheckTypeAndConvert(value interface{}) interface{} {
+	v := reflect.ValueOf(value)
+	if v.Kind() == reflect.Ptr ||
+		v.Kind() == reflect.Struct ||
+		v.Kind() == reflect.Map ||
+		v.Kind() == reflect.Slice ||
+		v.Kind() == reflect.Array {
+		return ToJSON(value)
+	}
+	return value
 }
 
 func ToStruct(jsonBytes []byte, result any) error {
