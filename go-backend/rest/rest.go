@@ -9,13 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
-)
-
-var (
-	restOnce   sync.Once
-	restClient *RestClient
 )
 
 type RestRequest struct {
@@ -42,14 +36,11 @@ type RestClient struct {
 	timeoutSec int
 }
 
-func InitRestClient(timeoutSec int) *RestClient {
-	restOnce.Do(func() {
-		restClient = &RestClient{
-			client:     &http.Client{},
-			timeoutSec: timeoutSec,
-		}
-	})
-	return restClient
+func NewRestClient(timeoutSec int) *RestClient {
+	return &RestClient{
+		client:     &http.Client{},
+		timeoutSec: timeoutSec,
+	}
 }
 
 func addHeaders(rq *http.Request, headers map[string]string) {
