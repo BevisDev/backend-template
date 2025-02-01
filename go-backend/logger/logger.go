@@ -11,13 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
-)
-
-var (
-	onceLogger sync.Once
-	appLogger  *AppLogger
 )
 
 type AppLogger struct {
@@ -53,12 +47,9 @@ type ResponseLogger struct {
 }
 
 func NewLogger(cf *ConfigLogger) *AppLogger {
-	onceLogger.Do(func() {
-		appLogger = &AppLogger{
-			logger: newLogger(cf),
-		}
-	})
-	return appLogger
+	return &AppLogger{
+		logger: newLogger(cf),
+	}
 }
 
 func newLogger(cf *ConfigLogger) *zap.Logger {

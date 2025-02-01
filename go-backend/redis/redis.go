@@ -6,13 +6,7 @@ import (
 	"github.com/BevisDev/backend-template/utils"
 	"github.com/redis/go-redis/v9"
 	"log"
-	"sync"
 	"time"
-)
-
-var (
-	redisOnce   sync.Once
-	redisClient *RedisClient
 )
 
 type RedisConfig struct {
@@ -27,16 +21,14 @@ type RedisClient struct {
 	client *redis.Client
 }
 
-func InitRedis(cf *RedisConfig) *RedisClient {
-	redisOnce.Do(func() {
-		r := &RedisClient{}
-		r.client = newClient(cf)
-		redisClient = r
-	})
-	return redisClient
+func NewRedis(cf *RedisConfig) (*RedisClient, error) {
+	rdb, err := newClient(cf)
+	return &RedisClient{
+		client: rdb,
+	}, err
 }
 
-func newClient(cf *RedisConfig) *redis.Client {
+func newClient(cf *RedisConfig) (*redis.Client, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cf.Host, cf.Port),
 		Password: cf.Password,
@@ -46,16 +38,15 @@ func newClient(cf *RedisConfig) *redis.Client {
 
 	_, err := rdb.Ping(context.Background()).Result()
 	if err != nil {
-		log.Fatal("Redis connect fail")
-		return nil
+		return nil, err
 	}
 	log.Println("Redis connect success")
-	return rdb
+	return rdb, err
 }
 
 func (r *RedisClient) Close() {
-	if redisClient != nil {
-		redisClient.Close()
+	if r.client != nil {
+		r.client.Close()
 	}
 }
 
