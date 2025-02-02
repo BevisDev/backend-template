@@ -20,7 +20,7 @@ type AppLogger struct {
 
 type ConfigLogger struct {
 	Profile    string
-	FolderName string
+	DirName    string
 	MaxSize    int
 	MaxBackups int
 	MaxAge     int
@@ -103,7 +103,7 @@ func writeSync(cf *ConfigLogger) zapcore.WriteSyncer {
 
 	now := time.Now().Format(consts.YYYY_MM_DD)
 	lumberLogger := lumberjack.Logger{
-		Filename:   filepath.Join(cf.FolderName, now, "app.log"),
+		Filename:   filepath.Join(cf.DirName, now, "app.log"),
 		MaxSize:    cf.MaxSize,
 		MaxBackups: cf.MaxBackups,
 		MaxAge:     cf.MaxAge,
@@ -114,7 +114,7 @@ func writeSync(cf *ConfigLogger) zapcore.WriteSyncer {
 	if cf.IsSplit {
 		c := cron.New()
 		c.AddFunc("0 0 * * *", func() {
-			lumberLogger.Filename = filepath.Join(cf.FolderName, now, "app.log")
+			lumberLogger.Filename = filepath.Join(cf.DirName, now, "app.log")
 			lumberLogger.Close()
 		})
 		c.Start()

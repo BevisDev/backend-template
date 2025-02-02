@@ -11,6 +11,7 @@ import (
 
 	//_ "github.com/denisenkom/go-mssqldb"
 	//_ "github.com/godror/godror"
+	//_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -59,6 +60,10 @@ func (d *Database) newConnection(cf *ConfigDB) (*sqlx.DB, error) {
 			cf.Host, cf.Port, cf.Username, cf.Password, cf.Schema)
 		driver = "sqlserver"
 		break
+	case consts.Postgres:
+		connStr = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			cf.Host, cf.Port, cf.Username, cf.Password, cf.Schema)
+		driver = "postgres"
 	case consts.Oracle:
 		connStr = fmt.Sprintf("user=%s password=%s connectString=%s:%d/%s",
 			cf.Username, cf.Password, cf.Host, cf.Port, cf.Schema)

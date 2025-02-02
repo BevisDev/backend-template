@@ -1,5 +1,7 @@
 # Go Backend
 
+this is repository contains base code
+
 ## Getting started
 
 ***Prerequisites***
@@ -28,6 +30,7 @@ using dependencies
 - [Handle Cron](#getting-cron)
 - [Handle Databases](#getting-databases)
 - [Handle Redis](#getting-redis)
+- [Handle Migrations DB](#getting-migrations-database)
 
 Utilities
 
@@ -183,12 +186,13 @@ go get github.com/google/wire/cmd/wire
 
 ***Install Driver***
 
-- [SQL Server](https://github.com/denisenkom/go-mssqldb)
-
 ```sh
-go get github.com/denisenkom/go-mssqldb
+go get github.com/denisenkom/go-mssqldb #MSSQL
+go get github.com/lib/pq #Postgresql
+go get github.com/godror/godror@latest #Oracle
 ```
 
+- [SQL Server](https://github.com/denisenkom/go-mssqldb)
 - [PostgreSQL](https://github.com/lib/pq)
 - [Oracle](https://github.com/godror/godror)
 - [Other Driver](https://go.dev/wiki/SQLDrivers)
@@ -227,4 +231,12 @@ Document: [RabbitMQ](https://github.com/rabbitmq/amqp091-go)
 
 ```sh
 go get github.com/rabbitmq/amqp091-go
+```
+
+### Getting migrations database
+
+Document: [Goose](https://github.com/pressly/goose)
+
+```sh
+go get github.com/pressly/goose/v3/cmd/goose@latest
 ```
