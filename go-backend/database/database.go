@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/BevisDev/backend-template/consts"
-	"github.com/BevisDev/backend-template/utils"
 	"log"
 	"time"
 
+	"github.com/BevisDev/core/helper"
+
 	//_ "github.com/denisenkom/go-mssqldb"
 	//_ "github.com/godror/godror"
+	//_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -30,14 +31,14 @@ type ConfigDB struct {
 
 type Database struct {
 	db         *sqlx.DB
-	Profile    string
-	TimeoutSec int
+	profile    string
+	timeoutSec int
 }
 
 func NewDB(cf *ConfigDB) (*Database, error) {
 	database := &Database{
-		Profile:    cf.Profile,
-		TimeoutSec: cf.TimeoutSec,
+		profile:    cf.Profile,
+		timeoutSec: cf.TimeoutSec,
 	}
 	db, err := database.newConnection(cf)
 	database.db = db
@@ -54,12 +55,16 @@ func (d *Database) newConnection(cf *ConfigDB) (*sqlx.DB, error) {
 
 	// build connectionString
 	switch cf.Kind {
-	case consts.SQLServer:
+	case helper.SQLServer:
 		connStr = fmt.Sprintf("server=%s;port=%d;user id=%s;password=%s;database=%s",
 			cf.Host, cf.Port, cf.Username, cf.Password, cf.Schema)
 		driver = "sqlserver"
 		break
-	case consts.Oracle:
+	case helper.Postgres:
+		connStr = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+			cf.Host, cf.Port, cf.Username, cf.Password, cf.Schema)
+		driver = "postgres"
+	case helper.Oracle:
 		connStr = fmt.Sprintf("user=%s password=%s connectString=%s:%d/%s",
 			cf.Username, cf.Password, cf.Host, cf.Port, cf.Schema)
 		driver = "godror"
@@ -83,7 +88,6 @@ func (d *Database) newConnection(cf *ConfigDB) (*sqlx.DB, error) {
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
-
 	log.Printf("connect db %s success \n", cf.Schema)
 	return db, nil
 }
@@ -93,92 +97,58 @@ func (d *Database) Close() {
 }
 
 func (d *Database) logQuery(query string) {
-	if d.Profile == "dev" {
+	if d.profile == "dev" {
 		log.Printf("Query: %s\n", query)
 	}
 }
 
 func (d *Database) GetList(c context.Context, dest interface{}, query string, args ...interface{}) error {
-	var err error
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	if utils.IsNilOrEmpty(args) {
-		err = d.db.SelectContext(ctx, dest, query)
-	} else {
-		err = d.db.SelectContext(ctx, dest, query, args...)
+	if helper.IsNilOrEmpty(args) {
+		return d.db.SelectContext(ctx, dest, query)
 	}
-	return err
+	return d.db.SelectContext(ctx, dest, query, args...)
 }
 
-func (d *Database) GetUsingNamed(c context.Context, dest interface{}, query string, args interface{}) error {
-	var err error
+func (d *Database) GetOne(c context.Context, dest interface{}, query string, args ...interface{}) error {
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	if utils.IsNilOrEmpty(args) {
-		err = d.db.GetContext(ctx, dest, query)
-	} else {
-		err = d.db.GetContext(ctx, dest, query, args)
+	if helper.IsNilOrEmpty(args) {
+		return d.db.GetContext(ctx, dest, query)
 	}
-	return err
+	return d.db.GetContext(ctx, dest, query, args...)
 }
 
-func (d *Database) GetUsingArgs(c context.Context, dest interface{}, query string, args ...interface{}) error {
-	var err error
+func (d *Database) ExecQuery(c context.Context, query string, args ...interface{}) error {
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	if utils.IsNilOrEmpty(args) {
-		err = d.db.GetContext(ctx, dest, query)
-	} else {
-		err = d.db.GetContext(ctx, dest, query, args...)
-	}
-	return err
-}
-
-func (d *Database) ExecQuery(c context.Context, isSelect bool, query string, args ...interface{}) error {
-	var (
-		err error
-		tx  *sqlx.Tx
-	)
-	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
-	defer cancel()
-
-	if !isSelect {
-		tx, err = d.db.BeginTxx(ctx, nil)
-		if err != nil {
-			return err
-		}
+	tx, err := d.db.BeginTxx(ctx, nil)
+	if err != nil {
+		return err
 	}
 
 	_, err = d.db.ExecContext(ctx, query, args...)
 	if err != nil {
-		if !isSelect {
-			tx.Rollback()
-		}
+		tx.Rollback()
 		return err
 	}
-	if !isSelect {
-		err = tx.Commit()
-	}
+	err = tx.Commit()
 	return err
 }
 
 func (d *Database) Insert(c context.Context, query string, args interface{}) error {
-	var (
-		err error
-		tx  *sqlx.Tx
-	)
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	tx, err = d.db.BeginTxx(ctx, nil)
+	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -193,16 +163,12 @@ func (d *Database) Insert(c context.Context, query string, args interface{}) err
 }
 
 func (d *Database) InsertedId(c context.Context, query string, args ...interface{}) (int, error) {
-	var (
-		id  int
-		tx  *sqlx.Tx
-		err error
-	)
+	var id int
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	tx, err = d.db.BeginTxx(ctx, nil)
+	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return id, err
 	}
@@ -217,15 +183,11 @@ func (d *Database) InsertedId(c context.Context, query string, args ...interface
 }
 
 func (d *Database) Update(c context.Context, query string, args interface{}) error {
-	var (
-		err error
-		tx  *sqlx.Tx
-	)
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	tx, err = d.db.BeginTxx(ctx, nil)
+	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -240,15 +202,11 @@ func (d *Database) Update(c context.Context, query string, args interface{}) err
 }
 
 func (d *Database) Delete(c context.Context, query string, args interface{}) error {
-	var (
-		err error
-		tx  *sqlx.Tx
-	)
 	d.logQuery(query)
-	ctx, cancel := utils.CreateCtxTimeout(c, d.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
-	tx, err = d.db.BeginTxx(ctx, nil)
+	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}

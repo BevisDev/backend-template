@@ -11,7 +11,7 @@ server:
 logger:
   isSplit: false
   cronTime: 0 0 * * *
-  folderName: ./logs/app
+  dirName: ./logs/app
   maxSize: 5
   maxBackup: 3
   maxAge: 28

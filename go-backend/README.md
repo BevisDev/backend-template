@@ -1,5 +1,7 @@
 # Go Backend
 
+this is repository contains base code
+
 ## Getting started
 
 ***Prerequisites***
@@ -22,12 +24,14 @@ go mod init github.com/BevisDev/go-backend
 using dependencies
 
 - [Framework](#getting-framework)
-- [Handle Configuration](#getting-viper)
-- [Handle Logger](#getting-logger)
-- [Handle Write log to rolling files](#getting-write-logs-to-rolling-files)
-- [Handle Cron](#getting-cron)
-- [Handle Databases](#getting-databases)
-- [Handle Redis](#getting-redis)
+- [Configuration](#getting-viper)
+- [Logger](#getting-logger)
+- [Lumberjack](#getting-write-logs-to-rolling-files)
+- [Cron](#getting-cron)
+- [Database](#getting-database)
+- [Redis](#getting-redis)
+- [Migration](#getting-migration)
+- [Keycloak](#getting-keycloak)
 
 Utilities
 
@@ -179,16 +183,17 @@ c.Start()
 go get github.com/google/wire/cmd/wire
 ```
 
-### Getting Databases
+### Getting Database
 
 ***Install Driver***
 
-- [SQL Server](https://github.com/denisenkom/go-mssqldb)
-
 ```sh
-go get github.com/denisenkom/go-mssqldb
+go get github.com/denisenkom/go-mssqldb #MSSQL
+go get github.com/lib/pq #Postgresql
+go get github.com/godror/godror@latest #Oracle
 ```
 
+- [SQL Server](https://github.com/denisenkom/go-mssqldb)
 - [PostgreSQL](https://github.com/lib/pq)
 - [Oracle](https://github.com/godror/godror)
 - [Other Driver](https://go.dev/wiki/SQLDrivers)
@@ -227,4 +232,27 @@ Document: [RabbitMQ](https://github.com/rabbitmq/amqp091-go)
 
 ```sh
 go get github.com/rabbitmq/amqp091-go
+```
+
+- ack(multiple bool)
+	- true: confirm all message sucessful
+	- false: confirm one message sucessfuly
+
+- nack(multiple, requeue bool)
+    - multiple like ack
+
+### Getting migration
+
+Document: [Goose](https://github.com/pressly/goose)
+
+```sh
+go get github.com/pressly/goose/v3/cmd/goose@latest
+```
+
+### Getting Keycloak
+
+Document: [Gocloak](https://github.com/Nerzal/gocloak)
+
+```sh
+go get github.com/Nerzal/gocloak/v13
 ```

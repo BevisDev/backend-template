@@ -2,16 +2,16 @@ package logger
 
 import (
 	"fmt"
-	"github.com/BevisDev/backend-template/consts"
-	"github.com/BevisDev/backend-template/utils"
-	"github.com/robfig/cron/v3"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/BevisDev/core/helper"
+	"github.com/robfig/cron/v3"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type AppLogger struct {
@@ -20,7 +20,7 @@ type AppLogger struct {
 
 type ConfigLogger struct {
 	Profile    string
-	FolderName string
+	DirName    string
 	MaxSize    int
 	MaxBackups int
 	MaxAge     int
@@ -47,24 +47,17 @@ type ResponseLogger struct {
 }
 
 func NewLogger(cf *ConfigLogger) *AppLogger {
-	return &AppLogger{
-		logger: newLogger(cf),
-	}
-}
-
-func newLogger(cf *ConfigLogger) *zap.Logger {
-	var logger *zap.Logger
+	var zapLogger *zap.Logger
 	encoder := getEncoderLog(cf)
 	appWrite := writeSync(cf)
 	appCore := zapcore.NewCore(encoder, appWrite, zapcore.InfoLevel)
-	logger = zap.New(appCore, zap.AddCaller())
-	return logger
+	zapLogger = zap.New(appCore, zap.AddCaller())
+	return &AppLogger{logger: zapLogger}
 }
 
 func getEncoderLog(cf *ConfigLogger) zapcore.Encoder {
 	var encodeConfig zapcore.EncoderConfig
-
-	// handle profile prod
+	// for prod
 	if cf.Profile == "prod" {
 		encodeConfig = zap.NewProductionEncoderConfig()
 		// 1716714967.877995 -> 2024-12-19T20:04:31.255+0700
@@ -79,19 +72,16 @@ func getEncoderLog(cf *ConfigLogger) zapcore.Encoder {
 		encodeConfig.EncodeCaller = zapcore.ShortCallerEncoder
 		return zapcore.NewJSONEncoder(encodeConfig)
 	}
-
-	// handle other profile
+	// for other
 	encodeConfig = zap.NewDevelopmentEncoderConfig()
 	encodeConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encodeConfig.TimeKey = "time"
 	encodeConfig.LevelKey = "level"
 	encodeConfig.CallerKey = "caller"
 	encodeConfig.MessageKey = "message"
-
 	if cf.Profile == "dev" {
 		return zapcore.NewConsoleEncoder(encodeConfig)
 	}
-
 	return zapcore.NewJSONEncoder(encodeConfig)
 }
 
@@ -101,9 +91,9 @@ func writeSync(cf *ConfigLogger) zapcore.WriteSyncer {
 		return zapcore.AddSync(os.Stdout)
 	}
 
-	now := time.Now().Format(consts.YYYY_MM_DD)
+	now := time.Now().Format(helper.YYYY_MM_DD)
 	lumberLogger := lumberjack.Logger{
-		Filename:   filepath.Join(cf.FolderName, now, "app.log"),
+		Filename:   filepath.Join(cf.DirName, now, "app.log"),
 		MaxSize:    cf.MaxSize,
 		MaxBackups: cf.MaxBackups,
 		MaxAge:     cf.MaxAge,
@@ -114,7 +104,7 @@ func writeSync(cf *ConfigLogger) zapcore.WriteSyncer {
 	if cf.IsSplit {
 		c := cron.New()
 		c.AddFunc("0 0 * * *", func() {
-			lumberLogger.Filename = filepath.Join(cf.FolderName, now, "app.log")
+			lumberLogger.Filename = filepath.Join(cf.DirName, now, "app.log")
 			lumberLogger.Close()
 		})
 		c.Start()
@@ -124,24 +114,16 @@ func writeSync(cf *ConfigLogger) zapcore.WriteSyncer {
 }
 
 func (l *AppLogger) logApp(level zapcore.Level, state string, msg string, args ...interface{}) {
-	// check state
-	if utils.IsNilOrEmpty(state) {
-		state = utils.GenUUID()
-	}
-
-	// new instance
 	if l.logger == nil {
 		return
 	}
-
 	// formater message
 	var message string
 	if len(args) != 0 {
-		message = formatMessage(msg, args...)
+		message = l.formatMessage(msg, args...)
 	} else {
 		message = msg
 	}
-
 	// skip caller before
 	logging := l.logger.WithOptions(zap.AddCallerSkip(2))
 	switch level {
@@ -162,7 +144,7 @@ func (l *AppLogger) logApp(level zapcore.Level, state string, msg string, args .
 	}
 }
 
-func formatMessage(msg string, args ...interface{}) string {
+func (l *AppLogger) formatMessage(msg string, args ...interface{}) string {
 	var message string
 	if !strings.Contains(msg, "%") && strings.Contains(msg, "{}") {
 		message = strings.ReplaceAll(msg, "{}", "%+v")
