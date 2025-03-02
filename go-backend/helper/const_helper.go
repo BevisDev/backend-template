@@ -1,4 +1,4 @@
-package consts
+package helper
 
 // datetime
 const (
@@ -27,7 +27,18 @@ const (
 
 // header
 const (
-	ContentType = "Content-Type"
+	ContentType         = "Content-Type"
+	Authorization       = "Authorization"
+	ApplicationJSON     = "application/json"
+	ApplicationFormData = "application/x-www-form-urlencoded"
+)
+
+// form data
+const (
+	ClientId          = "client_id"
+	ClientSecret      = "client_secret"
+	GrantType         = "grant_type"
+	ClientCredentials = "client_credentials"
 )
 
 // type db

@@ -5,8 +5,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/BevisDev/backend-template/consts"
-	"github.com/BevisDev/backend-template/utils"
+	"github.com/BevisDev/core/helper"
 	"github.com/jmoiron/sqlx"
 	"github.com/pressly/goose/v3"
 )
@@ -23,10 +22,10 @@ type Migration struct {
 func (m *Migration) Init() error {
 	var dialect string
 	switch m.TypeSQL {
-	case consts.SQLServer:
+	case helper.SQLServer:
 		dialect = "mssql"
 		break
-	case consts.Postgres:
+	case helper.Postgres:
 		dialect = "postgres"
 		break
 	default:
@@ -49,7 +48,7 @@ func (m *Migration) Up() error {
 	if err := m.Init(); err != nil {
 		return err
 	}
-	ctx, cancel := utils.CreateCtxTimeout(m.Ctx, m.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(m.Ctx, m.TimeoutSec)
 	defer cancel()
 	if m.Version != 0 {
 		if err := goose.UpToContext(ctx, m.Sqlx.DB, m.Dir, m.Version); err != nil {
@@ -71,7 +70,7 @@ func (m *Migration) Down() error {
 	if err := m.Init(); err != nil {
 		return err
 	}
-	ctx, cancel := utils.CreateCtxTimeout(m.Ctx, m.TimeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(m.Ctx, m.TimeoutSec)
 	defer cancel()
 	if m.Version != 0 {
 		if err := goose.DownToContext(ctx, m.Sqlx.DB, m.Dir, m.Version); err != nil {

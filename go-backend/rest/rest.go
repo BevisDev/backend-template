@@ -3,13 +3,13 @@ package rest
 import (
 	"bytes"
 	"context"
-	"github.com/BevisDev/backend-template/consts"
-	"github.com/BevisDev/backend-template/logger"
-	"github.com/BevisDev/backend-template/utils"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/BevisDev/core/helper"
+	"github.com/BevisDev/core/logger"
 )
 
 type RestRequest struct {
@@ -22,125 +22,91 @@ type RestRequest struct {
 	Result   any
 }
 
-type RestResponse struct {
-	StatusCode int
-	Header     http.Header
-	Body       string
-	HasError   bool
-	IsTimeout  bool
-	Error      error
-}
-
 type RestClient struct {
 	client     *http.Client
 	timeoutSec int
+	logger     *logger.AppLogger
 }
 
-func NewRestClient(timeoutSec int) *RestClient {
+func NewRestClient(timeoutSec int, logger *logger.AppLogger) *RestClient {
 	return &RestClient{
 		client:     &http.Client{},
 		timeoutSec: timeoutSec,
+		logger:     logger,
 	}
 }
 
 func addHeaders(rq *http.Request, headers map[string]string) {
-	if utils.IsNilOrEmpty(headers) || headers[consts.ContentType] == "" {
-		rq.Header.Set(consts.ContentType, "application/json")
-		return
+	if helper.IsNilOrEmpty(headers) || headers[helper.ContentType] == "" {
+		rq.Header.Set(helper.ContentType, helper.ApplicationJSON)
 	}
-
 	for key, value := range headers {
 		rq.Header.Add(key, value)
 	}
 }
 
-func (r *RestClient) execute(state string, request *http.Request, restReq *RestRequest, startTime time.Time) *RestResponse {
+func (r *RestClient) execute(state string, request *http.Request, restReq *RestRequest, startTime time.Time) error {
 	var (
-		response      *http.Response
-		err           error
 		respBodyBytes []byte
 	)
-	response, err = r.client.Do(request)
+	response, err := r.client.Do(request)
 	if err != nil {
-		// error timeout
-		if utils.IsTimedOut(err) {
-			return &RestResponse{
-				HasError:  true,
-				IsTimeout: true,
-				Error:     err,
-			}
-		}
-		return &RestResponse{
-			HasError: true,
-			Error:    err,
-		}
+		return err
 	}
 	defer response.Body.Close()
 
 	// read body
 	respBodyBytes, err = io.ReadAll(response.Body)
 	if err != nil {
-		return &RestResponse{HasError: true, Error: err}
+		return err
 	}
-
-	var (
-		result   RestResponse
-		duration = time.Since(startTime)
-		respStr  = utils.FromJSONBytes(respBodyBytes)
-	)
-	if response.StatusCode >= 400 {
-		result.HasError = true
+	hasBody := !helper.IsNilOrEmpty(respBodyBytes)
+	if hasBody {
+		if err = helper.ToStruct(respBodyBytes, restReq.Result); err != nil {
+			return err
+		}
 	}
-	result.StatusCode = response.StatusCode
-	result.Header = response.Header
-
-	// mapping result
-	if !utils.IsNilOrEmpty(restReq.Result) {
-		err = utils.ToStruct(respBodyBytes, restReq.Result)
-	} else {
-		result.Body = respStr
-	}
-
-	// logger
-	logger.NewLogger(nil).LogExtResponse(&logger.ResponseLogger{
+	// log response
+	responseLogger := &logger.ResponseLogger{
 		State:       state,
 		Status:      response.StatusCode,
-		DurationSec: duration,
-		Body:        respStr,
-	})
-	return &result
+		DurationSec: time.Since(startTime),
+	}
+	if hasBody {
+		responseLogger.Body = helper.FromJSONBytes(respBodyBytes)
+	}
+	r.logger.LogExtResponse(responseLogger)
+	return nil
 }
 
-func (r *RestClient) Post(c context.Context, restReq *RestRequest) *RestResponse {
+func (r *RestClient) Post(c context.Context, restReq *RestRequest) error {
 	var (
-		state        = utils.GetState(c)
+		state        = helper.GetState(c)
 		reqBodyBytes []byte
-		err          error
-		request      *http.Request
 	)
 
 	// serialize body
-	if !utils.IsNilOrEmpty(restReq.Body) {
-		reqBodyBytes = utils.ToJSON(restReq.Body)
+	if !helper.IsNilOrEmpty(restReq.Body) {
+		reqBodyBytes = helper.ToJSON(restReq.Body)
 	}
 
 	startTime := time.Now()
-	// log
-	logger.NewLogger(nil).LogExtRequest(&logger.RequestLogger{
+	// log request
+	r.logger.LogExtRequest(&logger.RequestLogger{
 		URL:    restReq.URL,
 		Method: http.MethodPost,
-		Body:   utils.ToJSONStr(restReq.Body),
+		Body:   helper.ToJSONStr(restReq.Body),
 		Time:   startTime,
 	})
 
-	ctx, cancel := utils.CreateCtxTimeout(c, r.timeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, r.timeoutSec)
 	defer cancel()
 
 	// created request
-	request, err = http.NewRequestWithContext(ctx, http.MethodPost,
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost,
 		restReq.URL, bytes.NewBuffer(reqBodyBytes))
 	if err != nil {
-		return &RestResponse{HasError: true, Error: err}
+		return err
 	}
 
 	// build header
@@ -150,38 +116,36 @@ func (r *RestClient) Post(c context.Context, restReq *RestRequest) *RestResponse
 	return r.execute(state, request, restReq, startTime)
 }
 
-func (r *RestClient) PostForm(c context.Context, restReq *RestRequest) *RestResponse {
+func (r *RestClient) PostForm(c context.Context, restReq *RestRequest) error {
 	var (
-		state   = utils.GetState(c)
-		err     error
-		request *http.Request
+		state   = helper.GetState(c)
 		reqBody = restReq.BodyForm.Encode()
 	)
 	startTime := time.Now()
-	// log
-	logger.NewLogger(nil).LogExtRequest(&logger.RequestLogger{
+	// log request
+	r.logger.LogExtRequest(&logger.RequestLogger{
 		State:  state,
 		URL:    restReq.URL,
 		Method: http.MethodPost,
 		Body:   reqBody,
 		Time:   startTime,
 	})
-	ctx, cancel := utils.CreateCtxTimeout(c, r.timeoutSec)
+	ctx, cancel := helper.CreateCtxTimeout(c, r.timeoutSec)
 	defer cancel()
 
 	// created request
-	request, err = http.NewRequestWithContext(ctx, http.MethodPost, restReq.URL,
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, restReq.URL,
 		bytes.NewBufferString(reqBody))
 	if err != nil {
-		return &RestResponse{HasError: true, Error: err}
+		return err
 	}
 
 	// build header
-	if utils.IsNilOrEmpty(restReq.Header) {
+	if helper.IsNilOrEmpty(restReq.Header) {
 		restReq.Header = make(map[string]string)
-		restReq.Header[consts.ContentType] = "application/x-www-form-urlencoded"
-	} else if restReq.Header[consts.ContentType] == "" {
-		restReq.Header[consts.ContentType] = "application/x-www-form-urlencoded"
+		restReq.Header[helper.ContentType] = helper.ApplicationFormData
+	} else if restReq.Header[helper.ContentType] == "" {
+		restReq.Header[helper.ContentType] = helper.ApplicationFormData
 	}
 	addHeaders(request, restReq.Header)
 

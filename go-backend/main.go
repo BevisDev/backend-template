@@ -8,4 +8,5 @@ package main
 // @contact.url    https://github.com/BevisDev
 // @contact.email  dev.binhtt@gmail.com
 func main() {
+
 }

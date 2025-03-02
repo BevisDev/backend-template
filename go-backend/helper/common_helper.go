@@ -1,15 +1,16 @@
-package utils
+package helper
 
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
-	"golang.org/x/text/unicode/norm"
 	"math"
 	"regexp"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/google/uuid"
+	"golang.org/x/text/unicode/norm"
 )
 
 func GenUUID() string {
@@ -25,6 +26,12 @@ func GetState(ctx context.Context) string {
 		state = GenUUID()
 	}
 	return state
+}
+
+func CopyCtx(c context.Context) context.Context {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, "state", GetState(c))
+	return ctx
 }
 
 func CreateCtx(state string) context.Context {
