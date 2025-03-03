@@ -103,3 +103,25 @@ func RemoveSpecialChars(str string) string {
 func RemoveWhiteSpace(str string) string {
 	return strings.ReplaceAll(str, " ", "")
 }
+
+func SplitNumberBatches(n, length int) [][]int {
+	var batches [][]int
+	start := 1
+
+	for start <= n {
+		end := start + length - 1
+		if end > n {
+			end = n
+		}
+
+		batch := make([]int, 0, end-start+1)
+		for i := start; i <= end; i++ {
+			batch = append(batch, i)
+		}
+		batches = append(batches, batch)
+
+		start = end + 1
+	}
+
+	return batches
+}

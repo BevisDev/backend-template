@@ -84,7 +84,7 @@ func (r *RedisCache) Get(ctx context.Context, key string, result interface{}) er
 		}
 		return err
 	}
-	err = helper.FromJSONStr(val, &result)
+	err = helper.FromJSONStr(val, result)
 	return err
 }
 

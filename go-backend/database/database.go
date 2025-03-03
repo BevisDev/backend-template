@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/BevisDev/core/helper"
@@ -102,30 +103,63 @@ func (d *Database) logQuery(query string) {
 	}
 }
 
+func (d *Database) isQueryIN(query string) bool {
+	return strings.Contains(query, "IN") || strings.Contains(query, "in")
+}
+
 func (d *Database) GetList(c context.Context, dest interface{}, query string, args ...interface{}) error {
+	var err error
+	if d.isQueryIN(query) {
+		query, args, err = sqlx.In(query, args...)
+		if err != nil {
+			return err
+		}
+	}
+	query = d.db.Rebind(query)
 	d.logQuery(query)
+
 	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
 	if helper.IsNilOrEmpty(args) {
 		return d.db.SelectContext(ctx, dest, query)
 	}
+
 	return d.db.SelectContext(ctx, dest, query, args...)
 }
 
 func (d *Database) GetOne(c context.Context, dest interface{}, query string, args ...interface{}) error {
+	var err error
+	if d.isQueryIN(query) {
+		query, args, err = sqlx.In(query, args...)
+		if err != nil {
+			return err
+		}
+	}
+	query = d.db.Rebind(query)
 	d.logQuery(query)
+
 	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
 	if helper.IsNilOrEmpty(args) {
 		return d.db.GetContext(ctx, dest, query)
 	}
+
 	return d.db.GetContext(ctx, dest, query, args...)
 }
 
 func (d *Database) ExecQuery(c context.Context, query string, args ...interface{}) error {
+	var err error
+	if d.isQueryIN(query) {
+		query, args, err = sqlx.In(query, args...)
+		if err != nil {
+			return err
+		}
+	}
+	query = d.db.Rebind(query)
 	d.logQuery(query)
+
 	ctx, cancel := helper.CreateCtxTimeout(c, d.timeoutSec)
 	defer cancel()
 
